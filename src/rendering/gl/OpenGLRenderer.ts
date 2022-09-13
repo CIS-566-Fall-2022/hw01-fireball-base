@@ -3,11 +3,11 @@ import Drawable from './Drawable';
 import Camera from '../../Camera';
 import {gl} from '../../globals';
 import ShaderProgram from './ShaderProgram';
+import Planet from '../../geometry/Planet';
 
 // In this file, `gl` is accessible because it is imported above
 class OpenGLRenderer {
-  time: number = 0;
-  prevTime: number = new Date().getTime();
+  private timeMs = 0;
 
   constructor(public canvas: HTMLCanvasElement) {}
 
@@ -24,26 +24,29 @@ class OpenGLRenderer {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
 
-  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>) {
-    let model = mat4.create();
+  addTime(dtMs: number) {
+    this.timeMs += dtMs;
+  }
+
+  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, modelMatrix: mat4 = mat4.identity(mat4.create())) {
     let viewProj = mat4.create();
 
-    mat4.identity(model);
     mat4.multiply(viewProj, camera.projectionMatrix, camera.viewMatrix);
-    prog.setModelMatrix(model);
+    prog.setModelMatrix(modelMatrix);
     prog.setViewMatrix(camera.viewMatrix);
     prog.setProjMatrix(camera.projectionMatrix);
     prog.setViewProjMatrix(viewProj);
     prog.setCameraPos(camera.controls.eye);
-
-    let currentTime = new Date().getTime();
-    this.time += currentTime - this.prevTime;
-    this.prevTime = currentTime;
-    prog.setTime(this.time);
+    prog.setTime(this.timeMs);
 
     for (let drawable of drawables) {
       prog.draw(drawable);
     }
+  }
+
+  renderPlanet(camera: Camera, planet: Planet) {
+    let modelMatrix = mat4.fromTranslation(mat4.create(), planet.position);
+    this.render(camera, planet.shaderProgram, [planet], modelMatrix);
   }
 };
 

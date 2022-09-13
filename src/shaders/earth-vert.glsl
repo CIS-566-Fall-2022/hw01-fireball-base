@@ -1,17 +1,18 @@
 #version 300 es
 
-precision highp float;
+uniform mat4 u_Model;
+uniform mat4 u_ModelInvTr;
+uniform mat4 u_ViewProj;
 
-in vec4 fs_Nor;
-in vec4 fs_Pos;
+in vec4 vs_Pos;
+in vec4 vs_Nor;
 
-in float fs_NorDisp;
+out vec4 fs_Nor;
+out vec4 fs_Pos;
 
-uniform vec3 u_CameraPos;
+out float fs_NorDisp;
 
 uniform float u_Time;
-
-out vec4 out_Col;
 
 vec3 random3(vec3 p) {
   return fract(sin(vec3(dot(p, vec3(185.3, 563.9, 887.2)),
@@ -100,23 +101,18 @@ WorleyInfo worley(vec4 uv) {
 }
 
 void main() {
-  float colorNoiseDisplace = perlin(vec4(fs_Pos.xyz * 2.0, u_Time / 10000.0));
-  colorNoiseDisplace = smoothstep(0.1, 0.8, colorNoiseDisplace);
-  vec3 baseColor1 = vec3(0.827, 0.192, 0.012);
-  vec3 baseColor2 = vec3(1.0, 0.631, 0.263);
-  float colorNoise = fbm(vec4(fs_Pos.xyz * 30.0 + colorNoiseDisplace * 10.0, u_Time / 3500.0));
-  vec3 baseColor = mix(baseColor1, baseColor2, smoothstep(0.25, 0.75, colorNoise));
+  mat3 invTranspose = mat3(u_ModelInvTr);
+  fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);
 
-  float emissionNoise = perlin(vec4(fs_Pos.xyz, u_Time / 4500.0));
-  emissionNoise = smoothstep(0.5, 0.75, emissionNoise);
-  emissionNoise = perlin(vec4((fs_Pos.xyz * 1.5) + emissionNoise, u_Time / 4500.0));
+  vec4 displacedPos = vs_Pos;
 
-  float aura = smoothstep(0.35, 0.0, dot(fs_Nor.xyz, normalize(u_CameraPos - fs_Pos.xyz)));
-  float emissionStrength = 1.5 
-          + colorNoiseDisplace * 5.0 
-          + emissionNoise * 0.6 
-          + fs_NorDisp * 2.0
-          + aura * 2.0;
-  
-  out_Col = vec4(baseColor * emissionStrength, 1);
+  // fs_NorDisp = smoothstep(0.0, 4.0, worley(vec4(vs_Pos.xyz * 1.2, u_Time / 2000.0)).dist) * 0.4;
+  // fs_NorDisp += worley(vec4(vs_Pos.xyz * 7.0, u_Time / 2000.0)).dist * 0.1;
+  // fs_NorDisp += fbm(vec4(vs_Pos.xyz * 5.0, u_Time / 4000.0)) * 0.2;
+
+  // displacedPos.xyz += fs_NorDisp * vs_Nor.xyz;
+
+  vec4 modelPosition = u_Model * displacedPos;
+  fs_Pos = modelPosition;
+  gl_Position = u_ViewProj * modelPosition;
 }

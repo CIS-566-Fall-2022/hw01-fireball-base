@@ -54,8 +54,7 @@ float perlin(vec4 p) {
 	return surfletSum;
 }
 
-#define OCTAVES 6
-
+#define OCTAVES 4
 float fbm(vec4 p) {
   float value = 0.0;
   float amplitude = 0.5;
@@ -115,5 +114,5 @@ void main() {
 
   vec4 modelPosition = u_Model * displacedPos;
   fs_Pos = modelPosition;
-  gl_Position = u_ViewProj * displacedPos;
+  gl_Position = u_ViewProj * modelPosition;
 }

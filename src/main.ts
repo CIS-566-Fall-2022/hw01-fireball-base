@@ -26,12 +26,19 @@ let skyQuad: Quad;
 function loadScene() {
   sun = new Planet([0, 0, 0], 1.0, 5.0, null);
   earth = new Planet([10, 0, 0], 0.4, 1.0, sun);
-  moon = new Planet([10.7, 0, 0], 0.1, 0.0123, earth);
+  moon = new Planet([10.9, 0, 0], 0.1, 0.0123, earth);
   
   planets = [sun, earth, moon];
 
   skyQuad = new Quad();
   skyQuad.create();
+}
+
+function createPlanetShader(gl: WebGL2RenderingContext, prefix: string) {
+  return new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/' + prefix + '-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/' + prefix + '-frag.glsl')),
+  ]);
 }
 
 let prevTime: number = new Date().getTime();
@@ -68,20 +75,9 @@ function main() {
   // Initial call to load scene
   loadScene();
 
-  sun.shaderProgram = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/sun-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/sun-frag.glsl')),
-  ]);
-
-  earth.shaderProgram = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/earth-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/earth-frag.glsl')),
-  ]);
-
-  moon.shaderProgram = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/moon-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/moon-frag.glsl')),
-  ]);
+  sun.shaderProgram = createPlanetShader(gl, 'sun');
+  earth.shaderProgram = createPlanetShader(gl, 'earth');
+  moon.shaderProgram = createPlanetShader(gl, 'moon');
 
   const skyShader = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/passthrough-vert.glsl')),
@@ -104,12 +100,8 @@ function main() {
     for (let planet of planets) {
       planet.updateVelocity(dtS, planets);
     }
-
     for (let planet of planets) {
       planet.updatePosition(dtS);
-    }
-    
-    for (let planet of planets) {
       renderer.renderPlanet(camera, planet);
     }
 
@@ -128,6 +120,12 @@ function main() {
     camera.setAspectRatio(window.innerWidth / window.innerHeight);
     camera.updateProjectionMatrix();
   }, false);
+
+  addEventListener('visibilitychange', (event) => {
+    if (document.visibilityState === 'visible') {
+      prevTime = new Date().getTime();
+    }
+  });
 
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.setAspectRatio(window.innerWidth / window.innerHeight);

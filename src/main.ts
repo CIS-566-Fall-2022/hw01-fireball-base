@@ -29,6 +29,9 @@ function loadScene() {
   moon = new Planet([10.9, 0, 0], 0.1, 0.0123, earth);
   
   planets = [sun, earth, moon];
+  
+  // earth = new Planet([0, 0, 0], 0.4, 1.0, null);
+  // planets = [earth];
 
   skyQuad = new Quad();
   skyQuad.create();

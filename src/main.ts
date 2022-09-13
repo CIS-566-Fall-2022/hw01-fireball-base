@@ -9,10 +9,8 @@ import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Planet from './geometry/Planet';
 
-// Define an object with application parameters and button callbacks
-// This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  'Load Scene': loadScene, // A function pointer, essentially
+  'Load Scene': loadScene,
 };
 
 let sun: Planet;
@@ -23,12 +21,16 @@ let planets: Array<Planet>;
 
 let skyQuad: Quad;
 
-function loadScene() {
+function loadScene(gl: WebGL2RenderingContext) {
   sun = new Planet([0, 0, 0], 1.0, 5.0, null, 15.0);
   earth = new Planet([10, 0, 0], 0.4, 1.0, sun, -2.0);
   moon = new Planet([10.9, 0, 0], 0.1, 0.0123, earth, 1.5);
   
   planets = [sun, earth, moon];
+
+  sun.shaderProgram = createPlanetShader(gl, 'sun');
+  earth.shaderProgram = createPlanetShader(gl, 'earth');
+  moon.shaderProgram = createPlanetShader(gl, 'moon');
 
   skyQuad = new Quad();
   skyQuad.create();
@@ -66,6 +68,8 @@ function main() {
   // Later, we can import `gl` from `globals.ts` to access it
   setGL(gl);
 
+  controls['Load Scene'] = function() { loadScene(gl); }; // update function callback to pass gl
+
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
@@ -73,11 +77,7 @@ function main() {
   gl.enable(gl.DEPTH_TEST);
 
   // Initial call to load scene
-  loadScene();
-
-  sun.shaderProgram = createPlanetShader(gl, 'sun');
-  earth.shaderProgram = createPlanetShader(gl, 'earth');
-  moon.shaderProgram = createPlanetShader(gl, 'moon');
+  loadScene(gl);
 
   const skyShader = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/passthrough-vert.glsl')),

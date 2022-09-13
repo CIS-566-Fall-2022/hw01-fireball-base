@@ -2,6 +2,7 @@ import {vec3} from 'gl-matrix';
 const Stats = require('stats-js');
 import * as DAT from 'dat.gui';
 import Icosphere from './geometry/Icosphere';
+import Quad from './geometry/Quad';
 import OpenGLRenderer from './rendering/gl/OpenGLRenderer';
 import Camera from './Camera';
 import {setGL} from './globals';
@@ -15,9 +16,14 @@ const controls = {
 
 let icosphere: Icosphere;
 
+let skyQuad: Quad;
+
 function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1.2, 6);
   icosphere.create();
+
+  skyQuad = new Quad();
+  skyQuad.create();
 }
 
 function main() {
@@ -52,9 +58,14 @@ function main() {
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
   gl.enable(gl.DEPTH_TEST);
 
-  const lambert = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
+  const sunShader = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/sun-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/sun-frag.glsl')),
+  ]);
+
+  const skyShader = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/passthrough-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/sky-frag.glsl')),
   ]);
 
   // This function will be called every frame
@@ -64,9 +75,14 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
 
-    renderer.render(camera, lambert, [
+    renderer.render(camera, sunShader, [
       icosphere,
     ]);
+
+    renderer.render(camera, skyShader, [
+      skyQuad,
+    ]);
+
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

@@ -1,4 +1,4 @@
-import {mat4, vec4} from 'gl-matrix';
+import {mat4, vec3} from 'gl-matrix';
 import Drawable from './Drawable';
 import Camera from '../../Camera';
 import {gl} from '../../globals';
@@ -6,8 +6,10 @@ import ShaderProgram from './ShaderProgram';
 
 // In this file, `gl` is accessible because it is imported above
 class OpenGLRenderer {
-  constructor(public canvas: HTMLCanvasElement) {
-  }
+  time: number = 0;
+  prevTime: number = new Date().getTime();
+
+  constructor(public canvas: HTMLCanvasElement) {}
 
   setClearColor(r: number, g: number, b: number, a: number) {
     gl.clearColor(r, g, b, a);
@@ -22,9 +24,21 @@ class OpenGLRenderer {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
 
-  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, time: number) {
-    prog.setEyeRefUp(camera.controls.eye, camera.controls.center, camera.controls.up);
-    prog.setTime(time);
+  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>) {
+    let model = mat4.create();
+    let viewProj = mat4.create();
+
+    mat4.identity(model);
+    mat4.multiply(viewProj, camera.projectionMatrix, camera.viewMatrix);
+    prog.setModelMatrix(model);
+    prog.setViewProjMatrix(viewProj);
+    // prog.setCameraPos(vec3.fromValues(-camera.viewMatrix[12], -camera.viewMatrix[13], -camera.viewMatrix[14]));
+    prog.setCameraPos(camera.controls.eye);
+
+    let currentTime = new Date().getTime();
+    this.time += currentTime - this.prevTime;
+    this.prevTime = currentTime;
+    prog.setTime(this.time);
 
     for (let drawable of drawables) {
       prog.draw(drawable);

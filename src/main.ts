@@ -24,14 +24,11 @@ let planets: Array<Planet>;
 let skyQuad: Quad;
 
 function loadScene() {
-  sun = new Planet([0, 0, 0], 1.0, 5.0, null);
-  earth = new Planet([10, 0, 0], 0.4, 1.0, sun);
-  moon = new Planet([10.9, 0, 0], 0.1, 0.0123, earth);
+  sun = new Planet([0, 0, 0], 1.0, 5.0, null, 15.0);
+  earth = new Planet([10, 0, 0], 0.4, 1.0, sun, -2.0);
+  moon = new Planet([10.9, 0, 0], 0.1, 0.0123, earth, 1.5);
   
   planets = [sun, earth, moon];
-  
-  // earth = new Planet([0, 0, 0], 0.4, 1.0, null);
-  // planets = [earth];
 
   skyQuad = new Quad();
   skyQuad.create();

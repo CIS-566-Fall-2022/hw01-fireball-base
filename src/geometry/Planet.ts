@@ -11,8 +11,11 @@ class Planet extends Icosphere {
   public shaderProgram: ShaderProgram
   public velocity = vec3.create();
 
+  public axisRotation = 0;
+  private axisRotationPerSecond: number;
+
   constructor(public position: vec3, radius: number, public mass: number, 
-      public parent: Planet, private invertVelocity: boolean = false) {
+      public parent: Planet, secondsPerAxisRotation: number) {
     super([0, 0, 0], radius, subdivisions);
 
     this.create();
@@ -20,6 +23,8 @@ class Planet extends Icosphere {
     if (this.parent != null) {
       this.setInitialVelocity();
     }
+
+    this.axisRotationPerSecond = 1.0 / secondsPerAxisRotation;
   }
 
   private setInitialVelocity() {
@@ -58,6 +63,8 @@ class Planet extends Icosphere {
   }
 
   public updatePosition(dt: number) {
+    this.axisRotation += this.axisRotationPerSecond * dt;
+
     if (this.parent == null) {
       return;
     }

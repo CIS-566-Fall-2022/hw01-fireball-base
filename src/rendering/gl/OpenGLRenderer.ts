@@ -46,6 +46,7 @@ class OpenGLRenderer {
 
   renderPlanet(camera: Camera, planet: Planet) {
     let modelMatrix = mat4.fromTranslation(mat4.create(), planet.position);
+    mat4.multiply(modelMatrix, modelMatrix, mat4.fromRotation(mat4.create(), planet.axisRotation, vec3.fromValues(0, 1, 0)));
     this.render(camera, planet.shaderProgram, [planet], modelMatrix);
   }
 };

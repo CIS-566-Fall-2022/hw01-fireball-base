@@ -9,8 +9,8 @@ in vec4 vs_Nor;
 
 out vec4 fs_Nor;
 out vec4 fs_Pos;
-out vec4 fs_DisplacedPos;
 
+out vec4 fs_DisplacedPos;
 out float fs_NorDisp;
 
 uniform float u_Time;

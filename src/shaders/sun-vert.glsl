@@ -10,6 +10,7 @@ in vec4 vs_Nor;
 out vec4 fs_Nor;
 out vec4 fs_Pos;
 
+out vec4 fs_DisplacedPos;
 out float fs_NorDisp;
 
 uniform float u_Time;
@@ -104,15 +105,15 @@ void main() {
   mat3 invTranspose = mat3(u_ModelInvTr);
   fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);
 
-  vec4 displacedPos = vs_Pos;
+  fs_DisplacedPos = vs_Pos;
 
   fs_NorDisp = smoothstep(0.0, 4.0, worley(vec4(vs_Pos.xyz * 1.2, u_Time / 2000.0)).dist) * 0.4;
   fs_NorDisp += worley(vec4(vs_Pos.xyz * 7.0, u_Time / 2000.0)).dist * 0.1;
   fs_NorDisp += fbm(vec4(vs_Pos.xyz * 5.0, u_Time / 4000.0)) * 0.2;
 
-  displacedPos.xyz += fs_NorDisp * vs_Nor.xyz;
+  fs_DisplacedPos.xyz += fs_NorDisp * vs_Nor.xyz;
 
-  vec4 modelPosition = u_Model * displacedPos;
+  vec4 modelPosition = u_Model * fs_DisplacedPos;
   fs_Pos = modelPosition;
   gl_Position = u_ViewProj * modelPosition;
 }

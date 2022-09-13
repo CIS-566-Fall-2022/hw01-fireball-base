@@ -4,8 +4,8 @@ precision highp float;
 
 in vec4 fs_Nor;
 in vec4 fs_Pos;
-in vec4 fs_DisplacedPos;
 
+in vec4 fs_DisplacedPos;
 in float fs_NorDisp;
 
 uniform vec3 u_CameraPos;

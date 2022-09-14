@@ -116,6 +116,7 @@ void main() {
   vec3 landColor = mix(landGreenColor, landIceColor, smoothstep(0.0, 0.02, fs_Poles));
 
   vec3 diffuseColor = mix(oceanColor, landColor, fs_NorDisp);
+  
 #ifdef NO_LAMBERT
   out_Col = vec4(diffuseColor, 1);
 #else

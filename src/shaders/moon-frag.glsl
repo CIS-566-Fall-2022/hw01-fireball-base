@@ -2,9 +2,12 @@
 
 precision highp float;
 
+// #define NO_LAMBERT
+
 in vec4 fs_Nor;
 in vec4 fs_Pos;
 
+in vec4 fs_DisplacedPos;
 in float fs_NorDisp;
 
 uniform vec3 u_CameraPos;
@@ -99,11 +102,21 @@ WorleyInfo worley(vec4 uv) {
   return worleyInfo;
 }
 
+const vec3 moonColor1 = vec3(145.0) / 255.0;
+const vec3 moonColor2 = vec3(89.0, 96.0, 97.0) / 255.0;
+
 void main() {
-  vec3 diffuseColor = vec3(0.5, 0.5, 0.5);
+  float moonColorNoise = fbm(vec4(fs_DisplacedPos.xyz * 20.0, 0));
+  vec3 diffuseColor = mix(moonColor1, moonColor2, smoothstep(0.3, 0.7, moonColorNoise));
+  diffuseColor *= mix(0.85, 1.0, smoothstep(0.0, 0.01, fs_NorDisp));
+
+#ifdef NO_LAMBERT
+  out_Col = vec4(diffuseColor, 1);
+#else
   float diffuseTerm = dot(normalize(fs_Nor), normalize(-fs_Pos)); // second term is vector from fs_Pos to (0, 0, 0)
   diffuseColor = clamp(diffuseColor, 0.0, 1.0);
   float ambientTerm = 0.05;
   float lightIntensity = diffuseTerm + ambientTerm;
   out_Col = vec4(diffuseColor * lightIntensity, 1);
+#endif
 }

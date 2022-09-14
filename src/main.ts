@@ -32,6 +32,9 @@ function loadScene(gl: WebGL2RenderingContext) {
   
   planets = [sun, earth, moon];
 
+  // earth = new Planet([0, 0, 0], 0.4, 1.0, null, -2.0);
+  // planets = [earth];
+
   sun.shaderProgram = createPlanetShader(gl, 'sun');
   earth.shaderProgram = createPlanetShader(gl, 'earth');
   moon.shaderProgram = createPlanetShader(gl, 'moon');

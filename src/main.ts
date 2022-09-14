@@ -1,7 +1,6 @@
 import {vec3} from 'gl-matrix';
 const Stats = require('stats-js');
 import * as DAT from 'dat.gui';
-import Icosphere from './geometry/Icosphere';
 import Quad from './geometry/Quad';
 import OpenGLRenderer from './rendering/gl/OpenGLRenderer';
 import Camera from './Camera';
@@ -10,8 +9,13 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Planet from './geometry/Planet';
 
 const controls = {
+  G: 1.0,
   'Load Scene': loadScene,
 };
+
+let defaultControls = {
+  ...controls
+}
 
 let sun: Planet;
 let earth: Planet;
@@ -56,6 +60,11 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
+
+  let gController = gui.add(controls, 'G', 0.2, 5.0).onChange((newG: number) => {
+    Planet.G = newG;
+  });
+
   gui.add(controls, 'Load Scene');
 
   // get canvas and webgl context
@@ -68,7 +77,15 @@ function main() {
   // Later, we can import `gl` from `globals.ts` to access it
   setGL(gl);
 
-  controls['Load Scene'] = function() { loadScene(gl); }; // update function callback to pass gl
+  controls['Load Scene'] = function() { 
+    loadScene(gl);
+
+    gController.setValue(defaultControls.G);
+
+    for (let planet of planets) {
+      planet.setInitialVelocity();
+    }
+  };
 
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
 

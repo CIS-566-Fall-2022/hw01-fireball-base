@@ -2,12 +2,11 @@ import {vec3} from 'gl-matrix';
 import ShaderProgram from '../rendering/gl/ShaderProgram';
 import Icosphere from "./Icosphere";
 
-// const G = 6.67430e-11;
-const G = 1.0;
-
 const subdivisions = 6;
 
 class Planet extends Icosphere {
+  static G: number = 1.0;
+
   public shaderProgram: ShaderProgram
   public velocity = vec3.create();
 
@@ -17,18 +16,18 @@ class Planet extends Icosphere {
   constructor(public position: vec3, radius: number, public mass: number, 
       public parent: Planet, secondsPerAxisRotation: number) {
     super([0, 0, 0], radius, subdivisions);
-
     this.create();
-
-    if (this.parent != null) {
-      this.setInitialVelocity();
-    }
-
+    
+    this.setInitialVelocity();
     this.axisRotationPerSecond = 1.0 / secondsPerAxisRotation;
   }
 
-  private setInitialVelocity() {
-    let v = Math.sqrt(G * this.parent.mass / vec3.distance(this.position, this.parent.position)); // sqrt((G * m_2) / r)
+  public setInitialVelocity() {
+    if (this.parent == null) {
+      return;
+    }
+
+    let v = Math.sqrt(Planet.G * this.parent.mass / vec3.distance(this.position, this.parent.position)); // sqrt((G * m_2) / r)
     let vecToParent = vec3.create();
     vec3.subtract(vecToParent, this.parent.position, this.position)
     vec3.normalize(vecToParent, vecToParent);
@@ -50,7 +49,7 @@ class Planet extends Icosphere {
       }
 
       let a2 = vec3.create();
-      let magnitude = G * planet.mass / vec3.squaredDistance(this.position, planet.position);
+      let magnitude = Planet.G * planet.mass / vec3.squaredDistance(this.position, planet.position);
       vec3.subtract(a2, planet.position, this.position);
       vec3.normalize(a2, a2);
       vec3.scale(a2, a2, magnitude);

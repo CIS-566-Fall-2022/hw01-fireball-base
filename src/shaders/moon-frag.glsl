@@ -100,25 +100,10 @@ WorleyInfo worley(vec4 uv) {
 }
 
 void main() {
-  // float colorNoiseDisplace = perlin(vec4(fs_Pos.xyz * 2.0, u_Time / 10000.0));
-  // colorNoiseDisplace = smoothstep(0.1, 0.8, colorNoiseDisplace);
-  // vec3 baseColor1 = vec3(0.827, 0.192, 0.012);
-  // vec3 baseColor2 = vec3(1.0, 0.631, 0.263);
-  // float colorNoise = fbm(vec4(fs_Pos.xyz * 30.0 + colorNoiseDisplace * 10.0, u_Time / 3500.0));
-  // vec3 baseColor = mix(baseColor1, baseColor2, smoothstep(0.25, 0.75, colorNoise));
-
-  // float emissionNoise = perlin(vec4(fs_Pos.xyz, u_Time / 4500.0));
-  // emissionNoise = smoothstep(0.5, 0.75, emissionNoise);
-  // emissionNoise = perlin(vec4((fs_Pos.xyz * 1.5) + emissionNoise, u_Time / 4500.0));
-
-  // float aura = smoothstep(0.35, 0.0, dot(fs_Nor.xyz, normalize(u_CameraPos - fs_Pos.xyz)));
-  // float emissionStrength = 1.5 
-  //         + colorNoiseDisplace * 5.0 
-  //         + emissionNoise * 0.6 
-  //         + fs_NorDisp * 2.0
-  //         + aura * 2.0;
-  
-  // out_Col = vec4(baseColor * emissionStrength, 1);
-
-  out_Col = vec4(0.5, 0.5, 0.5, 1);
+  vec3 diffuseColor = vec3(0.5, 0.5, 0.5);
+  float diffuseTerm = dot(normalize(fs_Nor), normalize(-fs_Pos)); // second term is vector from fs_Pos to (0, 0, 0)
+  diffuseColor = clamp(diffuseColor, 0.0, 1.0);
+  float ambientTerm = 0.05;
+  float lightIntensity = diffuseTerm + ambientTerm;
+  out_Col = vec4(diffuseColor * lightIntensity, 1);
 }

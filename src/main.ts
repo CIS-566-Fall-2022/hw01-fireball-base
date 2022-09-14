@@ -10,6 +10,7 @@ import Planet from './geometry/Planet';
 
 const controls = {
   G: 1.0,
+  'Sun Displacement Scale': 1.0,
   'Load Scene': loadScene,
 };
 
@@ -21,23 +22,24 @@ let sun: Planet;
 let earth: Planet;
 let moon: Planet;
 
+let sunShader: ShaderProgram;
+let earthShader: ShaderProgram;
+let moonShader: ShaderProgram;
+
 let planets: Array<Planet>;
 
 let skyQuad: Quad;
 
 function loadScene(gl: WebGL2RenderingContext) {
-  sun = new Planet([0, 0, 0], 1.0, 5.0, null, 15.0);
+  sun = new Planet([0, 0, 0], 1.4, 5.0, null, 15.0);
   earth = new Planet([10, 0, 0], 0.4, 1.0, sun, -2.0);
   moon = new Planet([10.9, 0, 0], 0.1, 0.0123, earth, 1.5);
   
   planets = [sun, earth, moon];
 
-  // moon = new Planet([0, 0, 0], 0.1, 0.0123, null, 1.5);
-  // planets = [moon];
-
-  sun.shaderProgram = createPlanetShader(gl, 'sun');
-  earth.shaderProgram = createPlanetShader(gl, 'earth');
-  moon.shaderProgram = createPlanetShader(gl, 'moon');
+  sun.shaderProgram = sunShader;
+  earth.shaderProgram = earthShader;
+  moon.shaderProgram = moonShader;
 
   skyQuad = new Quad();
   skyQuad.create();
@@ -61,15 +63,6 @@ function main() {
   stats.domElement.style.top = '0px';
   document.body.appendChild(stats.domElement);
 
-  // Add controls to the gui
-  const gui = new DAT.GUI();
-
-  let gController = gui.add(controls, 'G', 0.2, 5.0).onChange((newG: number) => {
-    Planet.G = newG;
-  });
-
-  gui.add(controls, 'Load Scene');
-
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
   const gl = <WebGL2RenderingContext> canvas.getContext('webgl2');
@@ -80,15 +73,33 @@ function main() {
   // Later, we can import `gl` from `globals.ts` to access it
   setGL(gl);
 
+  sunShader = createPlanetShader(gl, 'sun');
+  earthShader = createPlanetShader(gl, 'earth');
+  moonShader = createPlanetShader(gl, 'moon');
+
+  // Add controls to the gui
+  const gui = new DAT.GUI({ width: 400 });
+
+  let gController = gui.add(controls, 'G', 0.2, 5.0).onChange((newG: number) => {
+    Planet.G = newG;
+  });
+
+  let sunDispScaleController = gui.add(controls, 'Sun Displacement Scale', 0, 20.0).onChange((newDispScale: number) => {
+    sunShader.setDisplacementScale(newDispScale);
+  });
+
   controls['Load Scene'] = function() { 
     loadScene(gl);
 
     gController.setValue(defaultControls.G);
+    sunDispScaleController.setValue(defaultControls['Sun Displacement Scale']);
 
     for (let planet of planets) {
       planet.setInitialVelocity();
     }
   };
+
+  gui.add(controls, 'Load Scene');
 
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
 

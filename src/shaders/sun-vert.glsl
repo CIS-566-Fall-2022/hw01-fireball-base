@@ -15,6 +15,8 @@ out float fs_NorDisp;
 
 uniform float u_Time;
 
+uniform float u_DisplacementScale;
+
 vec3 random3(vec3 p) {
   return fract(sin(vec3(dot(p, vec3(185.3, 563.9, 887.2)),
                         dot(p, vec3(593.1, 591.2, 402.1)),
@@ -111,7 +113,7 @@ void main() {
   fs_NorDisp += worley(vec4(vs_Pos.xyz * 7.0, u_Time / 2000.0)).dist * 0.1;
   fs_NorDisp += fbm(vec4(vs_Pos.xyz * 5.0, u_Time / 4000.0)) * 0.2;
 
-  fs_DisplacedPos.xyz += fs_NorDisp * vs_Nor.xyz;
+  fs_DisplacedPos.xyz += fs_NorDisp * vs_Nor.xyz * u_DisplacementScale;
 
   vec4 modelPosition = u_Model * fs_DisplacedPos;
   fs_Pos = modelPosition;

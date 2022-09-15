@@ -10,7 +10,9 @@ import Planet from './geometry/Planet';
 
 const controls = {
   G: 1.0,
-  'Sun Displacement Scale': 1.0,
+  'Sun Displacement Height': 1.0,
+  'Sun Time Scale': 1.0,
+  'Sun Temperature (K)': 5778,
   'Load Scene': loadScene,
 };
 
@@ -30,6 +32,8 @@ let planets: Array<Planet>;
 
 let skyQuad: Quad;
 
+let loadSceneCallback: Function;
+
 function loadScene(gl: WebGL2RenderingContext) {
   sun = new Planet([0, 0, 0], 1.4, 5.0, null, 15.0);
   earth = new Planet([10, 0, 0], 0.4, 1.0, sun, -2.0);
@@ -43,6 +47,8 @@ function loadScene(gl: WebGL2RenderingContext) {
 
   skyQuad = new Quad();
   skyQuad.create();
+
+  loadSceneCallback();
 }
 
 function createPlanetShader(gl: WebGL2RenderingContext, prefix: string) {
@@ -84,20 +90,32 @@ function main() {
     Planet.G = newG;
   });
 
-  let sunDispScaleController = gui.add(controls, 'Sun Displacement Scale', 0, 20.0).onChange((newDispScale: number) => {
-    sunShader.setDisplacementScale(newDispScale);
+  let sunDispHeightController = gui.add(controls, 'Sun Displacement Height', 0, 20.0).onChange((newDispHeight: number) => {
+    sunShader.setDisplacementHeight(newDispHeight);
+  });
+
+  let sunTimeScaleController = gui.add(controls, 'Sun Time Scale', 0, 20.0).onChange((newTimeScale: number) => {
+    sunShader.setTimeScale(newTimeScale);
+  });
+
+  let sunTemperatureController = gui.add(controls, 'Sun Temperature (K)', 2000, 28000, 1).onChange((newTemperature: number) => {
+    sunShader.setTemperature(newTemperature);
   });
 
   controls['Load Scene'] = function() { 
     loadScene(gl);
+  };
 
+  loadSceneCallback = function() {
     gController.setValue(defaultControls.G);
-    sunDispScaleController.setValue(defaultControls['Sun Displacement Scale']);
+    sunDispHeightController.setValue(defaultControls['Sun Displacement Height']);
+    sunTimeScaleController.setValue(defaultControls['Sun Time Scale']);
+    sunTemperatureController.setValue(defaultControls['Sun Temperature (K)']);
 
     for (let planet of planets) {
       planet.setInitialVelocity();
     }
-  };
+  }
 
   gui.add(controls, 'Load Scene');
 

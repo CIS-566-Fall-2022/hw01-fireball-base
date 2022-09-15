@@ -33,7 +33,9 @@ class ShaderProgram {
   unifCameraPos: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
 
-  unifDisplacementScale: WebGLUniformLocation;
+  unifDisplacementHeight: WebGLUniformLocation;
+  unifTimeScale: WebGLUniformLocation;
+  unifTemperature: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -58,9 +60,9 @@ class ShaderProgram {
     this.unifCameraPos  = gl.getUniformLocation(this.prog, "u_CameraPos");
     this.unifTime       = gl.getUniformLocation(this.prog, "u_Time");
 
-    this.unifDisplacementScale = gl.getUniformLocation(this.prog, "u_DisplacementScale");
-
-    this.setDisplacementScale(1.0);
+    this.unifDisplacementHeight = gl.getUniformLocation(this.prog, "u_DisplacementHeight");
+    this.unifTimeScale = gl.getUniformLocation(this.prog, "u_TimeScale");
+    this.unifTemperature = gl.getUniformLocation(this.prog, "u_Temperature");
   }
 
   use() {
@@ -119,10 +121,24 @@ class ShaderProgram {
     }
   }
 
-  setDisplacementScale(displacementScale: number) {
+  setDisplacementHeight(displacementHeight: number) {
     this.use();
-    if (this.unifDisplacementScale !== -1) {
-      gl.uniform1f(this.unifDisplacementScale, displacementScale);
+    if (this.unifDisplacementHeight !== -1) {
+      gl.uniform1f(this.unifDisplacementHeight, displacementHeight);
+    }
+  }
+
+  setTimeScale(timeScale: number) {
+    this.use();
+    if (this.unifTimeScale !== -1) {
+      gl.uniform1f(this.unifTimeScale, timeScale);
+    }
+  }
+
+  setTemperature(temperature: number) {
+    this.use();
+    if (this.unifTemperature !== -1) {
+      gl.uniform1f(this.unifTemperature, temperature);
     }
   }
 

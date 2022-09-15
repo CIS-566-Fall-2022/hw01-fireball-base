@@ -1,3 +1,4 @@
+// https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
 export function randomGaussian(): number {
   let u = 1 - Math.random();
   let v = Math.random();

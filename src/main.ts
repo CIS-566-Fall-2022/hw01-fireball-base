@@ -8,6 +8,8 @@ import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Planet from './geometry/Planet';
 import * as rng from './random'
+import PlanetAccessory from './geometry/PlanetAccessory';
+import Icosphere from './geometry/Icosphere';
 
 const controls = {
   G: 1.0,
@@ -33,11 +35,14 @@ let sunShader: ShaderProgram;
 let earthShader: ShaderProgram;
 let moonShader: ShaderProgram;
 
-let planets: Array<Planet>;
+let earthCloudsShader: ShaderProgram;
+
+let planets: Array<Planet> = [];
+let sunArray: Array<Planet> = [];
 
 // asteroids
 
-let asteroids: Array<Planet>;
+let asteroids: Array<Planet> = [];
 let numAsteroids = 2000;
 let asteroidShader: ShaderProgram;
 
@@ -50,25 +55,34 @@ let skyQuad: Quad;
 let loadSceneCallback: Function;
 
 function loadScene(gl: WebGL2RenderingContext) {
+  for (let planet of [...planets, ...asteroids]) {
+    if (planet != null) {
+      planet.destroy();
+    }
+  }
+
   sun = new Planet([0, 0, 0], 1.4, 5.0, null, 15.0).setShaderProgram(sunShader);
-  earth = new Planet([9, 2, 0], 0.4, 1.0, sun, -2.0).setShaderProgram(earthShader);
-  moon = new Planet([10, 2, 0], 0.1, 0.0123, earth, 1.5).setShaderProgram(moonShader);
+  earth = new Planet([9, 1, 0], 0.4, 1.0, sun, -2.0).setShaderProgram(earthShader);
+  moon = new Planet([10, 1, 0], 0.1, 0.0123, earth, 1.5).setShaderProgram(moonShader);
 
   planets = [sun, earth, moon];
+  sunArray = [sun];
+
+  earth.addAccessory().setDrawable(new Icosphere([0, 0, 0], 0.45, 4))
+    .setShaderProgram(earthCloudsShader);
 
   asteroids = [];
   for (let i = 0; i < numAsteroids; ++i) {
     let angle = Math.random() * 2.0 * Math.PI;
     let distance = 25.0;
     let position = vec3.fromValues(Math.cos(angle) * distance, 0.0, Math.sin(angle) * distance);
-    let randomDisplacement = 0.5;
     vec3.add(position, position, vec3.fromValues(
-      randomDisplacement * rng.randomGaussian(),
-      randomDisplacement * rng.randomGaussian(),
-      randomDisplacement * rng.randomGaussian()
+      0.8 * rng.randomGaussian(),
+      0.2 * rng.randomGaussian(),
+      0.8 * rng.randomGaussian()
     ));
 
-    let radius = rng.random(0.005, 0.008);
+    let radius = rng.random(0.008, 0.012);
     let mass = 0.0001 * Math.pow((radius / 0.05), 3.0);
     let secondsPerAxisRotation = rng.random(1.0, 2.0) * rng.randomSign();
 
@@ -101,7 +115,9 @@ function main() {
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
-  const gl = <WebGL2RenderingContext> canvas.getContext('webgl2');
+  const gl = <WebGL2RenderingContext> canvas.getContext('webgl2', {
+    premultipliedAlpha: false
+  });
   if (!gl) {
     alert('WebGL 2 not supported!');
   }
@@ -109,9 +125,17 @@ function main() {
   // Later, we can import `gl` from `globals.ts` to access it
   setGL(gl);
 
+  gl.enable(gl.BLEND)
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
   sunShader = createPlanetShader(gl, 'sun');
   earthShader = createPlanetShader(gl, 'earth');
   moonShader = createPlanetShader(gl, 'moon');
+
+  earthCloudsShader = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/no-displacement-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/earth-clouds-frag.glsl')),
+  ]);
 
   asteroidShader = createPlanetShader(gl, 'asteroid');
 
@@ -154,7 +178,7 @@ function main() {
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
-  renderer.setClearColor(0.2, 0.2, 0.2, 1);
+  renderer.setClearColor(1.0, 0, 0, 1);
   gl.enable(gl.DEPTH_TEST);
 
   // Initial call to load scene
@@ -178,19 +202,17 @@ function main() {
     prevTime = currentTime;
 
     let dtS = dtMs / 1000.0;
+
     for (let planet of planets) {
       planet.updateVelocity(dtS, planets);
     }
     for (let asteroid of asteroids) {
-      asteroid.updateVelocity(dtS, planets);
+      asteroid.updateVelocity(dtS, sunArray);
     }
-    for (let planet of planets) {
+
+    for (let planet of [...planets, ...asteroids]) {
       planet.updatePosition(dtS);
       renderer.renderPlanet(camera, planet);
-    }
-    for (let asteroid of asteroids) {
-      asteroid.updatePosition(dtS);
-      renderer.renderPlanet(camera, asteroid);
     }
 
     renderer.render(camera, skyShader, [

@@ -21,7 +21,9 @@ class OpenGLRenderer {
   }
 
   clear() {
+    gl.colorMask(false, false, false, true);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.colorMask(true, true, true, true);
   }
 
   addTime(dtMs: number) {
@@ -48,6 +50,9 @@ class OpenGLRenderer {
     let modelMatrix = mat4.fromTranslation(mat4.create(), planet.position);
     mat4.multiply(modelMatrix, modelMatrix, mat4.fromRotation(mat4.create(), planet.axisRotation, vec3.fromValues(0, 1, 0)));
     this.render(camera, planet.shaderProgram, [planet], modelMatrix);
+    for (let accessory of planet.accessories) {
+      this.render(camera, accessory.getShaderProgram(), [accessory.getDrawable()], modelMatrix);
+    }
   }
 };
 

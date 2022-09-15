@@ -1,5 +1,7 @@
 import {vec3} from 'gl-matrix';
+import Drawable from '../rendering/gl/Drawable';
 import ShaderProgram from '../rendering/gl/ShaderProgram';
+import PlanetAccessory from './PlanetAccessory';
 import Icosphere from "./Icosphere";
 
 class Planet extends Icosphere {
@@ -11,6 +13,8 @@ class Planet extends Icosphere {
   public axisRotation = 0;
   private axisRotationPerSecond: number;
 
+  public accessories: Array<PlanetAccessory> = [];
+
   constructor(public position: vec3, radius: number, public mass: number, 
       public parent: Planet, secondsPerAxisRotation: number, subdivisions: number = 6) {
     super([0, 0, 0], radius, subdivisions);
@@ -18,6 +22,13 @@ class Planet extends Icosphere {
     
     this.setInitialVelocity();
     this.axisRotationPerSecond = 1.0 / secondsPerAxisRotation;
+  }
+
+  override destroy() {
+    super.destroy();
+    for (let accessory of this.accessories) {
+      accessory.getDrawable().destroy();
+    }
   }
 
   public setInitialVelocity() {
@@ -74,6 +85,12 @@ class Planet extends Icosphere {
   public setShaderProgram(shaderProgram: ShaderProgram): Planet {
     this.shaderProgram = shaderProgram;
     return this;
+  }
+
+  public addAccessory(): PlanetAccessory {
+    let accessory = new PlanetAccessory();
+    this.accessories.push(accessory);
+    return accessory;
   }
 }
 

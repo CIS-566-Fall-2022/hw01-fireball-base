@@ -121,7 +121,7 @@ void main() {
   out_Col = vec4(diffuseColor, 1);
 #else
   float diffuseTerm = dot(normalize(fs_Nor), normalize(-fs_Pos)); // second term is vector from fs_Pos to (0, 0, 0)
-  diffuseColor = clamp(diffuseColor, 0.0, 1.0) * 2.0;
+  diffuseTerm = clamp(diffuseTerm, 0.0, 1.0) * 2.0;
   float ambientTerm = 0.05;
   float lightIntensity = diffuseTerm + ambientTerm;
   out_Col = vec4(diffuseColor * lightIntensity, 1);

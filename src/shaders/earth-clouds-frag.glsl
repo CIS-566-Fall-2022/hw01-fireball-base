@@ -7,8 +7,7 @@ precision highp float;
 in vec4 fs_Nor;
 in vec4 fs_Pos;
 
-in vec4 fs_DisplacedPos;
-in float fs_NorDisp;
+in vec4 fs_OriginalPos;
 
 uniform vec3 u_CameraPos;
 
@@ -102,21 +101,29 @@ WorleyInfo worley(vec4 uv) {
   return worleyInfo;
 }
 
-const vec3 moonColor1 = vec3(145.0) / 255.0;
-const vec3 moonColor2 = vec3(89.0, 96.0, 97.0) / 255.0;
+const vec3 landGreenColor1 = vec3(128.0, 179.0, 52.0) / 255.0;
+const vec3 landGreenColor2 = vec3(48.0, 102.0, 48.0) / 255.0;
+const vec3 landIceColor = vec3(219.0, 241.0, 253.0) / 255.0;
+const vec3 oceanColor = vec3(6.0, 66.0, 115.0) / 255.0;
 
 void main() {
-  float moonColorNoise = fbm(vec4(fs_DisplacedPos.xyz * 20.0, 0));
-  vec3 diffuseColor = mix(moonColor1, moonColor2, smoothstep(0.3, 0.7, moonColorNoise));
-  diffuseColor *= mix(0.85, 1.0, smoothstep(0.0, 0.01, fs_NorDisp));
+  float perlinOffset = perlin(vec4(fs_OriginalPos.xyz * 4.0, 0)) * 1.2;
+  float cloudsNoise = fbm(vec4(fs_OriginalPos.xyz * 8.0 + vec3(perlinOffset), 0));
+  float alpha = smoothstep(0.45, 0.65, cloudsNoise);
+
+  if (alpha < 0.01) {
+    discard;
+  }
+
+  vec4 diffuseColor = vec4(vec3(1.0), alpha);
 
 #ifdef NO_LAMBERT
-  out_Col = vec4(diffuseColor, 1);
+  out_Col = diffuseColor;
 #else
   float diffuseTerm = dot(normalize(fs_Nor), normalize(-fs_Pos)); // second term is vector from fs_Pos to (0, 0, 0)
   diffuseTerm = clamp(diffuseTerm, 0.0, 1.0) * 2.0;
   float ambientTerm = 0.05;
   float lightIntensity = diffuseTerm + ambientTerm;
-  out_Col = vec4(diffuseColor * lightIntensity, 1);
+  out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
 #endif
 }

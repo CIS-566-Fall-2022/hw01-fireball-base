@@ -50,8 +50,8 @@ let loadSceneCallback: Function;
 
 function loadScene(gl: WebGL2RenderingContext) {
   sun = new Planet([0, 0, 0], 1.4, 5.0, null, 15.0).setShaderProgram(sunShader);
-  earth = new Planet([10, 1, 0], 0.4, 1.0, sun, -2.0).setShaderProgram(earthShader);
-  moon = new Planet([10.9, 1, 0], 0.1, 0.0123, earth, 1.5).setShaderProgram(moonShader);
+  earth = new Planet([9, 2, 0], 0.4, 1.0, sun, -2.0).setShaderProgram(earthShader);
+  moon = new Planet([10, 2, 0], 0.1, 0.0123, earth, 1.5).setShaderProgram(moonShader);
 
   planets = [sun, earth, moon];
 

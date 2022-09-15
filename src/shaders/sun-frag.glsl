@@ -131,7 +131,7 @@ vec3 getSunColor(float temperature, float mixFactor) {
     color1 = mix(sunColorYellow1, sunColorWhite1, mixFactor2);
     color2 = mix(sunColorYellow2, sunColorWhite2, mixFactor2);
   } else {
-    float mixFactor2 = smoothstep(11000.0, 28000.0, temperature);
+    float mixFactor2 = smoothstep(13000.0, 28000.0, temperature);
     color1 = mix(sunColorWhite1, sunColorBlue1, mixFactor2);
     color2 = mix(sunColorWhite2, sunColorBlue2, mixFactor2);
   }

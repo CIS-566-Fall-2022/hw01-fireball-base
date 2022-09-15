@@ -7,6 +7,7 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Planet from './geometry/Planet';
+import * as rand from './random'
 
 const controls = {
   G: 1.0,
@@ -60,11 +61,11 @@ function loadScene(gl: WebGL2RenderingContext) {
     let angle = Math.random() * 2.0 * Math.PI;
     let distance = 25.0;
     let position = vec3.fromValues(Math.cos(angle) * distance, 0.0, Math.sin(angle) * distance);
-    let randomDisplacement = 0.9;
+    let randomDisplacement = 0.5;
     vec3.add(position, position, vec3.fromValues(
-      (Math.random() * randomDisplacement * 2.0) - randomDisplacement,
-      (Math.random() * randomDisplacement * 2.0) - randomDisplacement,
-      (Math.random() * randomDisplacement * 2.0) - randomDisplacement,
+      randomDisplacement * rand.randomGaussian(),
+      randomDisplacement * rand.randomGaussian(),
+      randomDisplacement * rand.randomGaussian()
     ));
 
     let radius = Math.random() * 0.003 + 0.0035;

@@ -1,20 +1,23 @@
 #version 300 es
 
-precision highp float;
+uniform mat4 u_Model;
+uniform mat4 u_ModelInvTr;
+uniform mat4 u_ViewProj;
 
-// #define NO_LAMBERT
+in vec4 vs_Pos;
+in vec4 vs_Nor;
 
-in vec4 fs_Nor;
-in vec4 fs_Pos;
+out vec4 fs_Nor;
+out vec4 fs_Pos;
 
-in vec4 fs_DisplacedPos;
-in float fs_NorDisp;
-
-uniform vec3 u_CameraPos;
+out vec4 fs_DisplacedPos;
+out float fs_NorDisp;
 
 uniform float u_Time;
 
-out vec4 out_Col;
+float random1(float p) {
+  return fract(sin(p * 592.4) * 102934.239);
+}
 
 vec3 random3(vec3 p) {
   return fract(sin(vec3(dot(p, vec3(185.3, 563.9, 887.2)),
@@ -85,6 +88,11 @@ WorleyInfo worley(vec4 uv) {
         for (int w = -1; w <= 1; ++w) {
           vec4 neighbor = vec4(float(x), float(y), float(z), float(w));
           vec4 point = random4(uvInt + neighbor);
+
+          if (random1(point.x) < 0.8) {
+            continue;
+          }
+
           vec4 diff = neighbor + point - uvFract;
           float dist = length(diff);
           if (dist < minDist) {
@@ -102,21 +110,17 @@ WorleyInfo worley(vec4 uv) {
   return worleyInfo;
 }
 
-const vec3 moonColor1 = vec3(145.0) / 255.0;
-const vec3 moonColor2 = vec3(89.0, 96.0, 97.0) / 255.0;
-
 void main() {
-  float moonColorNoise = fbm(vec4(fs_DisplacedPos.xyz * 20.0, 0));
-  vec3 diffuseColor = mix(moonColor1, moonColor2, smoothstep(0.3, 0.7, moonColorNoise));
-  diffuseColor *= mix(0.85, 1.0, smoothstep(0.0, 0.01, fs_NorDisp));
+  mat3 invTranspose = mat3(u_ModelInvTr);
+  fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);
 
-#ifdef NO_LAMBERT
-  out_Col = vec4(diffuseColor, 1);
-#else
-  float diffuseTerm = dot(normalize(fs_Nor), normalize(-fs_Pos)); // second term is vector from fs_Pos to (0, 0, 0)
-  diffuseColor = clamp(diffuseColor, 0.0, 1.0) * 2.0;
-  float ambientTerm = 0.05;
-  float lightIntensity = diffuseTerm + ambientTerm;
-  out_Col = vec4(diffuseColor * lightIntensity, 1);
-#endif
+  fs_DisplacedPos = vs_Pos;
+
+  fs_NorDisp = worley(vec4(vs_Pos.xyz * 700.0, 0)).dist * 0.05;
+
+  fs_DisplacedPos.xyz += fs_NorDisp * vs_Nor.xyz;
+
+  vec4 modelPosition = u_Model * fs_DisplacedPos;
+  fs_Pos = modelPosition;
+  gl_Position = u_ViewProj * modelPosition;
 }

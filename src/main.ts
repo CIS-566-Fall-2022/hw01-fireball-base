@@ -20,6 +20,10 @@ let defaultControls = {
   ...controls
 }
 
+// ================================
+
+// planets
+
 let sun: Planet;
 let earth: Planet;
 let moon: Planet;
@@ -30,20 +34,46 @@ let moonShader: ShaderProgram;
 
 let planets: Array<Planet>;
 
+// asteroids
+
+let asteroids: Array<Planet>;
+let numAsteroids = 2000;
+let asteroidShader: ShaderProgram;
+
+// sky
+
 let skyQuad: Quad;
+
+// ================================
 
 let loadSceneCallback: Function;
 
 function loadScene(gl: WebGL2RenderingContext) {
-  sun = new Planet([0, 0, 0], 1.4, 5.0, null, 15.0);
-  earth = new Planet([10, 0, 0], 0.4, 1.0, sun, -2.0);
-  moon = new Planet([10.9, 0, 0], 0.1, 0.0123, earth, 1.5);
-  
+  sun = new Planet([0, 0, 0], 1.4, 5.0, null, 15.0).setShaderProgram(sunShader);
+  earth = new Planet([10, 1, 0], 0.4, 1.0, sun, -2.0).setShaderProgram(earthShader);
+  moon = new Planet([10.9, 1, 0], 0.1, 0.0123, earth, 1.5).setShaderProgram(moonShader);
+
   planets = [sun, earth, moon];
 
-  sun.shaderProgram = sunShader;
-  earth.shaderProgram = earthShader;
-  moon.shaderProgram = moonShader;
+  asteroids = [];
+  for (let i = 0; i < numAsteroids; ++i) {
+    let angle = Math.random() * 2.0 * Math.PI;
+    let distance = 25.0;
+    let position = vec3.fromValues(Math.cos(angle) * distance, 0.0, Math.sin(angle) * distance);
+    let randomDisplacement = 0.9;
+    vec3.add(position, position, vec3.fromValues(
+      (Math.random() * randomDisplacement * 2.0) - randomDisplacement,
+      (Math.random() * randomDisplacement * 2.0) - randomDisplacement,
+      (Math.random() * randomDisplacement * 2.0) - randomDisplacement,
+    ));
+
+    let radius = Math.random() * 0.003 + 0.0035;
+    let mass = 0.0001 * Math.pow((radius / 0.05), 3.0);
+    let secondsPerAxisRotation = Math.random() * 1.0 + 1.0;
+    secondsPerAxisRotation *= (Math.random() > 0.5 ? 1 : -1);
+
+    asteroids.push(new Planet(position, radius, mass, sun, secondsPerAxisRotation, 1).setShaderProgram(asteroidShader));
+  }
 
   skyQuad = new Quad();
   skyQuad.create();
@@ -82,6 +112,8 @@ function main() {
   sunShader = createPlanetShader(gl, 'sun');
   earthShader = createPlanetShader(gl, 'earth');
   moonShader = createPlanetShader(gl, 'moon');
+
+  asteroidShader = createPlanetShader(gl, 'asteroid');
 
   // Add controls to the gui
   const gui = new DAT.GUI({ width: 400 });
@@ -149,9 +181,16 @@ function main() {
     for (let planet of planets) {
       planet.updateVelocity(dtS, planets);
     }
+    for (let asteroid of asteroids) {
+      asteroid.updateVelocity(dtS, planets);
+    }
     for (let planet of planets) {
       planet.updatePosition(dtS);
       renderer.renderPlanet(camera, planet);
+    }
+    for (let asteroid of asteroids) {
+      asteroid.updatePosition(dtS);
+      renderer.renderPlanet(camera, asteroid);
     }
 
     renderer.render(camera, skyShader, [

@@ -2,8 +2,6 @@ import {vec3} from 'gl-matrix';
 import ShaderProgram from '../rendering/gl/ShaderProgram';
 import Icosphere from "./Icosphere";
 
-const subdivisions = 6;
-
 class Planet extends Icosphere {
   static G: number = 1.0;
 
@@ -14,7 +12,7 @@ class Planet extends Icosphere {
   private axisRotationPerSecond: number;
 
   constructor(public position: vec3, radius: number, public mass: number, 
-      public parent: Planet, secondsPerAxisRotation: number) {
+      public parent: Planet, secondsPerAxisRotation: number, subdivisions: number = 6) {
     super([0, 0, 0], radius, subdivisions);
     this.create();
     
@@ -71,6 +69,11 @@ class Planet extends Icosphere {
     let dx = vec3.create();
     vec3.scale(dx, this.velocity, dt);
     vec3.add(this.position, this.position, dx);
+  }
+
+  public setShaderProgram(shaderProgram: ShaderProgram): Planet {
+    this.shaderProgram = shaderProgram;
+    return this;
   }
 }
 

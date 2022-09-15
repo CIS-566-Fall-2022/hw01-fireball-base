@@ -7,7 +7,7 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Planet from './geometry/Planet';
-import * as rand from './random'
+import * as rng from './random'
 
 const controls = {
   G: 1.0,
@@ -63,15 +63,14 @@ function loadScene(gl: WebGL2RenderingContext) {
     let position = vec3.fromValues(Math.cos(angle) * distance, 0.0, Math.sin(angle) * distance);
     let randomDisplacement = 0.5;
     vec3.add(position, position, vec3.fromValues(
-      randomDisplacement * rand.randomGaussian(),
-      randomDisplacement * rand.randomGaussian(),
-      randomDisplacement * rand.randomGaussian()
+      randomDisplacement * rng.randomGaussian(),
+      randomDisplacement * rng.randomGaussian(),
+      randomDisplacement * rng.randomGaussian()
     ));
 
-    let radius = Math.random() * 0.003 + 0.0035;
+    let radius = rng.random(0.005, 0.008);
     let mass = 0.0001 * Math.pow((radius / 0.05), 3.0);
-    let secondsPerAxisRotation = Math.random() * 1.0 + 1.0;
-    secondsPerAxisRotation *= (Math.random() > 0.5 ? 1 : -1);
+    let secondsPerAxisRotation = rng.random(1.0, 2.0) * rng.randomSign();
 
     asteroids.push(new Planet(position, radius, mass, sun, secondsPerAxisRotation, 1).setShaderProgram(asteroidShader));
   }

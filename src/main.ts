@@ -29,10 +29,12 @@ let defaultControls = {
 let sun: Planet;
 let earth: Planet;
 let moon: Planet;
+let jupiter: Planet;
 
 let sunShader: ShaderProgram;
 let earthShader: ShaderProgram;
 let moonShader: ShaderProgram;
+let jupiterShader: ShaderProgram;
 
 let earthCloudsShader: ShaderProgram;
 
@@ -59,11 +61,12 @@ function loadScene(gl: WebGL2RenderingContext) {
     }
   }
 
-  sun = new Planet([0, 0, 0], 1.4, 5.0, null, 15.0).setShaderProgram(sunShader);
+  sun = new Planet([0, 0, 0], 3.0, 10.0, null, 15.0).setShaderProgram(sunShader);
   earth = new Planet([14, 1, 0], 0.4, 1.0, sun, -2.0).setShaderProgram(earthShader);
   moon = new Planet([15, 1, 0], 0.1, 0.0123, earth, 1.5).setShaderProgram(moonShader);
+  jupiter = new Planet([80, 3, 0], 1.6, 3.0, sun, 0.8).setShaderProgram(jupiterShader);
 
-  planets = [sun, earth, moon];
+  planets = [sun, earth, moon, jupiter];
 
   earth.addAccessory().setDrawable(new Icosphere([0, 0, 0], 0.45, 4))
     .setShaderProgram(earthCloudsShader);
@@ -99,6 +102,13 @@ function createPlanetShader(gl: WebGL2RenderingContext, prefix: string) {
   ]);
 }
 
+function createNoDisplacementShader(gl: WebGL2RenderingContext, prefix: string) {
+  return new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/no-displacement-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/' + prefix + '-frag.glsl')),
+  ]);
+}
+
 let prevTime: number = new Date().getTime();
 
 function main() {
@@ -128,11 +138,9 @@ function main() {
   sunShader = createPlanetShader(gl, 'sun');
   earthShader = createPlanetShader(gl, 'earth');
   moonShader = createPlanetShader(gl, 'moon');
+  jupiterShader = createNoDisplacementShader(gl, 'jupiter');
 
-  earthCloudsShader = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/no-displacement-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/earth-clouds-frag.glsl')),
-  ]);
+  earthCloudsShader = createNoDisplacementShader(gl, 'earth-clouds');
 
   asteroidShader = createPlanetShader(gl, 'asteroid');
 
@@ -172,7 +180,7 @@ function main() {
 
   gui.add(controls, 'Load Scene');
 
-  const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
+  const camera = new Camera(vec3.fromValues(0, 0, 10), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(1.0, 0, 0, 1);

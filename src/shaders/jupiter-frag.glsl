@@ -1,22 +1,19 @@
 #version 300 es
 
-uniform mat4 u_Model;
-uniform mat4 u_ModelInvTr;
-uniform mat4 u_ViewProj;
+precision highp float;
 
-in vec4 vs_Pos;
-in vec4 vs_Nor;
+// #define NO_LAMBERT
 
-out vec4 fs_Nor;
-out vec4 fs_Pos;
+in vec4 fs_Nor;
+in vec4 fs_Pos;
 
-out vec4 fs_DisplacedPos;
-out float fs_NorDisp;
+in vec4 fs_OriginalPos;
+
+uniform vec3 u_CameraPos;
 
 uniform float u_Time;
 
-uniform float u_DisplacementHeight;
-uniform float u_TimeScale;
+out vec4 out_Col;
 
 vec3 random3(vec3 p) {
   return fract(sin(vec3(dot(p, vec3(185.3, 563.9, 887.2)),
@@ -105,20 +102,15 @@ WorleyInfo worley(vec4 uv) {
 }
 
 void main() {
-  float time = u_Time * u_TimeScale;
+  vec3 diffuseColor = vec3(1.0, 0.0, 0.0);
 
-  mat3 invTranspose = mat3(u_ModelInvTr);
-  fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);
-
-  fs_DisplacedPos = vs_Pos;
-
-  fs_NorDisp = smoothstep(0.0, 4.0, worley(vec4(vs_Pos.xyz * 1.2, time / 2000.0)).dist) * 0.4;
-  fs_NorDisp += worley(vec4(vs_Pos.xyz * 7.0, time / 2000.0)).dist * 0.1;
-  fs_NorDisp += fbm(vec4(vs_Pos.xyz * 5.0, time / 4000.0)) * 0.2;
-
-  fs_DisplacedPos.xyz += fs_NorDisp * vs_Nor.xyz * u_DisplacementHeight * 1.5;
-
-  vec4 modelPosition = u_Model * fs_DisplacedPos;
-  fs_Pos = modelPosition;
-  gl_Position = u_ViewProj * modelPosition;
+#ifdef NO_LAMBERT
+  out_Col = vec4(diffuseColor, 1);
+#else
+  float diffuseTerm = dot(normalize(fs_Nor), normalize(-fs_Pos)); // second term is vector from fs_Pos to (0, 0, 0)
+  diffuseTerm = clamp(diffuseTerm, 0.0, 1.0) * 2.0;
+  float ambientTerm = 0.05;
+  float lightIntensity = diffuseTerm + ambientTerm;
+  out_Col = vec4(diffuseColor * lightIntensity, 1);
+#endif
 }

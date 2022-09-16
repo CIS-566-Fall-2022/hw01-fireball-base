@@ -62,11 +62,10 @@ function loadScene(gl: WebGL2RenderingContext) {
   }
 
   sun = new Planet([0, 0, 0], 1.4, 5.0, null, 15.0).setShaderProgram(sunShader);
-  earth = new Planet([9, 1, 0], 0.4, 1.0, sun, -2.0).setShaderProgram(earthShader);
-  moon = new Planet([10, 1, 0], 0.1, 0.0123, earth, 1.5).setShaderProgram(moonShader);
+  earth = new Planet([14, 1, 0], 0.4, 1.0, sun, -2.0).setShaderProgram(earthShader);
+  moon = new Planet([15, 1, 0], 0.1, 0.0123, earth, 1.5).setShaderProgram(moonShader);
 
   planets = [sun, earth, moon];
-  sunArray = [sun];
 
   earth.addAccessory().setDrawable(new Icosphere([0, 0, 0], 0.45, 4))
     .setShaderProgram(earthCloudsShader);
@@ -74,19 +73,19 @@ function loadScene(gl: WebGL2RenderingContext) {
   asteroids = [];
   for (let i = 0; i < numAsteroids; ++i) {
     let angle = Math.random() * 2.0 * Math.PI;
-    let distance = 25.0;
+    let distance = 45.0;
     let position = vec3.fromValues(Math.cos(angle) * distance, 0.0, Math.sin(angle) * distance);
     vec3.add(position, position, vec3.fromValues(
-      0.8 * rng.randomGaussian(),
-      0.2 * rng.randomGaussian(),
-      0.8 * rng.randomGaussian()
+      2.0 * rng.randomGaussian(),
+      0.5 * rng.randomGaussian(),
+      2.0 * rng.randomGaussian()
     ));
 
     let radius = rng.random(0.008, 0.012);
-    let mass = 0.0001 * Math.pow((radius / 0.05), 3.0);
+    let mass = 0.0001 * Math.pow((radius / 0.01), 3.0);
     let secondsPerAxisRotation = rng.random(1.0, 2.0) * rng.randomSign();
 
-    asteroids.push(new Planet(position, radius, mass, sun, secondsPerAxisRotation, 1).setShaderProgram(asteroidShader));
+    asteroids.push(new Planet(position, radius * 4.0, mass, sun, secondsPerAxisRotation, 1).setShaderProgram(asteroidShader));
   }
 
   skyQuad = new Quad();
@@ -202,14 +201,9 @@ function main() {
     prevTime = currentTime;
 
     let dtS = dtMs / 1000.0;
-
-    for (let planet of planets) {
+    for (let planet of [...planets, ...asteroids]) {
       planet.updateVelocity(dtS, planets);
     }
-    for (let asteroid of asteroids) {
-      asteroid.updateVelocity(dtS, sunArray);
-    }
-
     for (let planet of [...planets, ...asteroids]) {
       planet.updatePosition(dtS);
       renderer.renderPlanet(camera, planet);

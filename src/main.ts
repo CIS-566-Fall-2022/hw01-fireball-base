@@ -64,7 +64,7 @@ function loadScene(gl: WebGL2RenderingContext) {
   sun = new Planet([0, 0, 0], 3.0, 10.0, null, 15.0).setShaderProgram(sunShader);
   earth = new Planet([14, 1, 0], 0.4, 1.0, sun, -2.0).setShaderProgram(earthShader);
   moon = new Planet([15, 1, 0], 0.1, 0.0123, earth, 1.5).setShaderProgram(moonShader);
-  jupiter = new Planet([80, 3, 0], 1.2, 3.0, sun, 0.8).setShaderProgram(jupiterShader);
+  jupiter = new Planet([100, 3, 0], 1.3, 3.0, sun, 0.8).setShaderProgram(jupiterShader);
 
   planets = [sun, earth, moon, jupiter];
 

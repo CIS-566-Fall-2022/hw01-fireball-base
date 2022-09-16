@@ -8,7 +8,6 @@ import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Planet from './geometry/Planet';
 import * as rng from './random'
-import PlanetAccessory from './geometry/PlanetAccessory';
 import Icosphere from './geometry/Icosphere';
 
 const controls = {
@@ -38,7 +37,6 @@ let moonShader: ShaderProgram;
 let earthCloudsShader: ShaderProgram;
 
 let planets: Array<Planet> = [];
-let sunArray: Array<Planet> = [];
 
 // asteroids
 
@@ -141,7 +139,7 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI({ width: 400 });
 
-  let gController = gui.add(controls, 'G', 0.2, 5.0).onChange((newG: number) => {
+  let gController = gui.add(controls, 'G', 0.1, 20.0).onChange((newG: number) => {
     Planet.G = newG;
   });
 

@@ -68,12 +68,12 @@ float perlin(vec4 p) {
 	return surfletSum;
 }
 
-float perlin(vec3 p) {
-  return perlin(vec4(p, 0));
-}
-
 float perlin(vec3 p, float t) {
   return perlin(vec4(p, t));
+}
+
+float perlin(vec3 p) {
+  return perlin(p, 0.0);
 }
 
 #define OCTAVES 4
@@ -86,6 +86,14 @@ float fbm(vec4 p) {
     amplitude *= 0.5;
   }
   return value;
+}
+
+float fbm(vec3 p, float t) {
+  return fbm(vec4(p, t));
+}
+
+float fbm(vec3 p) {
+  return fbm(p, 0.0);
 }
 
 struct WorleyInfo {

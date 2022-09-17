@@ -1,3 +1,13 @@
+# Project Description
+
+[Live demo](https://adityagupta1.github.io/hw01-fireball-base/)
+
+The fireball in this project is the Sun, which I made look as realistic as I could (while taking some artistic liberties). There are sliders to control aspects of the Sun's displacement, as well as change its color based on a temperature in Kelvin, which more or less matches how real stars work. The scene also includes a background full of stars generated using a modified Worley noise algorithm very similar to scattering particles with jitter.
+
+My favorite part of the scene is the physically simulated solar system around the sun. I've included the Earth, the Moon, Jupiter, and the asteroid belt. There is a slider to control the value of the gravitational constant, which can make the planets fly off into the distance or crash into the sun depending on which direction you move it. I may add more planets, but if you still see this sentence then I probably didn't. 
+
+Most of the shaders make use of perlin noise, FBM, and Worley noise for their effects. I combined a lot of these by displacing the inputs to create more interesting patterns, and I used the smoothstep function in various places to extract certain ranges of values.
+
 # [Project 1: Noise](https://github.com/CIS-566-Fall-2022/hw01-fireball-base)
 
 ## Objective

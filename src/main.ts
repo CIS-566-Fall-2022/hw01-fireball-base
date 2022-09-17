@@ -64,7 +64,7 @@ function loadScene(gl: WebGL2RenderingContext) {
   sun = new Planet([0, 0, 0], 3.0, 10.0, null, 15.0).setShaderProgram(sunShader);
   earth = new Planet([14, 1, 0], 0.4, 1.0, sun, -2.0).setShaderProgram(earthShader);
   moon = new Planet([15, 1, 0], 0.1, 0.0123, earth, 1.5).setShaderProgram(moonShader);
-  jupiter = new Planet([100, 3, 0], 1.3, 3.0, sun, 0.8).setShaderProgram(jupiterShader);
+  jupiter = new Planet([100, -3, 0], 1.3, 3.0, sun, 0.8).setShaderProgram(jupiterShader);
 
   planets = [sun, earth, moon, jupiter];
 
@@ -147,15 +147,15 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI({ width: 400 });
 
-  let gController = gui.add(controls, 'G', 0.1, 20.0).onChange((newG: number) => {
+  let gController = gui.add(controls, 'G', 0, 20).onChange((newG: number) => {
     Planet.G = newG;
   });
 
-  let sunDispHeightController = gui.add(controls, 'Sun Displacement Height', 0, 20.0).onChange((newDispHeight: number) => {
+  let sunDispHeightController = gui.add(controls, 'Sun Displacement Height', 0, 20).onChange((newDispHeight: number) => {
     sunShader.setDisplacementHeight(newDispHeight);
   });
 
-  let sunTimeScaleController = gui.add(controls, 'Sun Time Scale', 0, 20.0).onChange((newTimeScale: number) => {
+  let sunTimeScaleController = gui.add(controls, 'Sun Time Scale', 0, 20).onChange((newTimeScale: number) => {
     sunShader.setTimeScale(newTimeScale);
   });
 
@@ -176,6 +176,8 @@ function main() {
     for (let planet of planets) {
       planet.setInitialVelocity();
     }
+
+    prevTime = new Date().getTime();
   }
 
   gui.add(controls, 'Load Scene');

@@ -39,7 +39,7 @@ void main() {
   float polesNoise = abs(dot(fs_Nor.xyz, vec3(0, 1, 0))) + blueStormsNoise * 0.1;
   polesNoise = smoothstep(0.94, 1.0, polesNoise);
 
-  float redStormsNoise = fbm(vec4(fs_OriginalPos.xyz * 10.0, u_Time / 1500.0)) * blueStormsNoise;
+  float redStormsNoise = fbm(fs_OriginalPos.xyz * 10.0, u_Time / 1500.0) * blueStormsNoise;
   vec3 redStormsColor = mix(jupiterStormsRedColor1, jupiterStormsRedColor2, redStormsNoise);
   redStormsNoise = smoothstep(0.0, 0.5, redStormsNoise);
   float redStormsDistance = distance(fs_OriginalPos.xyz * vec3(1.0, 1.5, 1.0) + perlin(fs_OriginalPos.xyz * 10.0) * 0.05, vec3(1.2, -0.32, 0));

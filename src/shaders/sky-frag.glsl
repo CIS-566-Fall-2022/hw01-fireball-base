@@ -34,7 +34,7 @@ WorleyInfo modifiedWorley(vec3 uv) {
   return worleyInfo;
 }
 
-const float starColorMultiplier = 3.0;
+const float starColorMultiplier = 2.2;
 const vec3 starPalette[5] = vec3[](
   vec3(123.0, 208.0, 255.0) / 255.0 * starColorMultiplier,
   vec3(255.0, 220.0, 85.0) / 255.0 * starColorMultiplier,

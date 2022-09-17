@@ -24,6 +24,15 @@ vec4 random4(vec4 p) {
                   )) * 43758.5453);
 }
 
+float surflet(float p, float gridPoint) {
+  float t2 = abs(p - gridPoint);
+  float t = 1.f - 6.f * pow(t2, 5.f) + 15.f * pow(t2, 4.f) - 10.f * pow(t2, 3.f);
+  float gradient = random1(gridPoint) * 2. - 1.;
+  float diff = p - gridPoint;
+  float height = diff * gradient;
+  return height * t;
+}
+
 float surflet(vec4 p, vec4 gridPoint) {
   vec4 t2 = abs(p - gridPoint);
   vec4 t = vec4(1.f) - 6.f * pow(t2, vec4(5.f)) + 15.f * pow(t2, vec4(4.f)) - 10.f * pow(t2, vec4(3.f));
@@ -31,6 +40,16 @@ float surflet(vec4 p, vec4 gridPoint) {
   vec4 diff = p - gridPoint;
   float height = dot(diff, gradient);
   return height * t.x * t.y * t.z * t.w;
+}
+
+float perlin(float p) {
+	float surfletSum = 0.f;
+
+	for (int dx = 0; dx <= 1; ++dx) {
+    surfletSum += surflet(p, floor(p) + float(dx));
+	}
+
+	return surfletSum;
 }
 
 float perlin(vec4 p) {
@@ -47,6 +66,14 @@ float perlin(vec4 p) {
 	}
 
 	return surfletSum;
+}
+
+float perlin(vec3 p) {
+  return perlin(vec4(p, 0));
+}
+
+float perlin(vec3 p, float t) {
+  return perlin(vec4(p, t));
 }
 
 #define OCTAVES 4
@@ -93,6 +120,10 @@ WorleyInfo worley(vec4 uv) {
   worleyInfo.dist = minDist;
   worleyInfo.color = color;
   return worleyInfo;
+}
+
+WorleyInfo worley(vec3 p, float t) {
+  return worley(vec4(p, t));
 }
 `
 

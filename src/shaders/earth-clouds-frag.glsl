@@ -23,8 +23,8 @@ const vec3 landIceColor = vec3(219.0, 241.0, 253.0) / 255.0;
 const vec3 oceanColor = vec3(6.0, 66.0, 115.0) / 255.0;
 
 void main() {
-  float perlinOffset = perlin(vec4(fs_OriginalPos.xyz * 4.0, 0)) * 1.2;
-  float cloudsNoise = fbm(vec4(fs_OriginalPos.xyz * 8.0 + vec3(perlinOffset), 0));
+  float perlinOffset = perlin(vec4(fs_OriginalPos.xyz * 4.0, u_Time / 5000.0)) * 1.2;
+  float cloudsNoise = fbm(vec4(fs_OriginalPos.xyz * 8.0 + vec3(perlinOffset), u_Time / 5000.0));
   float alpha = smoothstep(0.45, 0.65, cloudsNoise);
 
   if (alpha < 0.01) {

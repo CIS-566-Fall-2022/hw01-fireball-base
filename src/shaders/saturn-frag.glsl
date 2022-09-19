@@ -2,7 +2,7 @@
 
 precision highp float;
 
-#define NO_LAMBERT
+// #define NO_LAMBERT
 
 in vec4 fs_Nor;
 in vec4 fs_Pos;
@@ -39,7 +39,7 @@ void main() {
   vec3 saturnColor = mix(saturnBaseColor1, saturnBaseColor2, verticalNoise);
   saturnColor = mix(saturnColor, saturnBlueStormsColor, poles * 0.18);
 
-  vec4 diffuseColor = vec4(saturnColor, 1);
+  vec4 diffuseColor = vec4(saturnColor * 0.5, 1);
 
 LAMBERT GOES HERE
 }

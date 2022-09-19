@@ -30,11 +30,13 @@ let sun: Planet;
 let earth: Planet;
 let moon: Planet;
 let jupiter: Planet;
+let saturn: Planet;
 
 let sunShader: ShaderProgram;
 let earthShader: ShaderProgram;
 let moonShader: ShaderProgram;
 let jupiterShader: ShaderProgram;
+let saturnShader: ShaderProgram;
 
 let earthCloudsShader: ShaderProgram;
 
@@ -64,9 +66,13 @@ function loadScene(gl: WebGL2RenderingContext) {
   sun = new Planet([0, 0, 0], 3.0, 10.0, null, 15.0).setShaderProgram(sunShader);
   earth = new Planet([14, 1, 0], 0.4, 1.0, sun, -2.0).setShaderProgram(earthShader);
   moon = new Planet([15, 1, 0], 0.1, 0.0123, earth, 1.5).setShaderProgram(moonShader);
-  jupiter = new Planet([100, -3, 0], 1.3, 3.0, sun, 0.8).setShaderProgram(jupiterShader);
+  jupiter = new Planet([100, -3, 0], 1.3, 3.5, sun, 0.8).setShaderProgram(jupiterShader);
+  saturn = new Planet([-75, 4, -50], 1.15, 2.2, sun, 0.9).setShaderProgram(jupiterShader);
 
-  planets = [sun, earth, moon, jupiter];
+  planets = [sun, earth, moon, jupiter, saturn];
+
+  saturn = new Planet([0, 0, 0], 1.15, 2.2, null, 0.9).setShaderProgram(saturnShader);
+  planets = [saturn];
 
   earth.addAccessory().setDrawable(new Icosphere([0, 0, 0], 0.45, 4))
     .setShaderProgram(earthCloudsShader);
@@ -95,18 +101,19 @@ function loadScene(gl: WebGL2RenderingContext) {
   loadSceneCallback();
 }
 
-function createPlanetShader(gl: WebGL2RenderingContext, prefix: string) {
+function createShader(gl: WebGL2RenderingContext, prefixVert: string, prefixFrag: string) {
   return new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/' + prefix + '-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/' + prefix + '-frag.glsl')),
+    new Shader(gl.VERTEX_SHADER, require('./shaders/' + prefixVert + '-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/' + prefixFrag + '-frag.glsl')),
   ]);
 }
 
-function createNoDisplacementShader(gl: WebGL2RenderingContext, prefix: string) {
-  return new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/no-displacement-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/' + prefix + '-frag.glsl')),
-  ]);
+function createPlanetShader(gl: WebGL2RenderingContext, prefix: string) {
+  return createShader(gl, prefix, prefix);
+}
+
+function createNoDisplacementShader(gl: WebGL2RenderingContext, prefixFrag: string) {
+  return createShader(gl, 'no-displacement', prefixFrag);
 }
 
 let prevTime: number = new Date().getTime();
@@ -139,6 +146,7 @@ function main() {
   earthShader = createPlanetShader(gl, 'earth');
   moonShader = createPlanetShader(gl, 'moon');
   jupiterShader = createNoDisplacementShader(gl, 'jupiter');
+  saturnShader = createNoDisplacementShader(gl, 'saturn');
 
   earthCloudsShader = createNoDisplacementShader(gl, 'earth-clouds');
 

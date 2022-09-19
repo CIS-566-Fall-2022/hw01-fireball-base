@@ -34,10 +34,10 @@ void main() {
   polesMultiplier = (polesMultiplier + 1.0) / 2.0;
   poles *= mix(0.996, 1.0, polesMultiplier);
   poles = smoothstep(0.92, 0.98, poles);
-  vec3 saturnBlueStormsColor = mix(saturnStormsBlueColor1, saturnStormsBlueColor2, perlin(vec3(poles * 5.0)));
+  vec3 saturnBlueStormsColor = mix(saturnStormsBlueColor1, saturnStormsBlueColor2, perlin(vec3(poles * 5.0))) * 0.85;
   
   vec3 saturnColor = mix(saturnBaseColor1, saturnBaseColor2, verticalNoise);
-  saturnColor = mix(saturnColor, saturnBlueStormsColor, poles * 0.15);
+  saturnColor = mix(saturnColor, saturnBlueStormsColor, poles * 0.18);
 
   vec4 diffuseColor = vec4(saturnColor, 1);
 

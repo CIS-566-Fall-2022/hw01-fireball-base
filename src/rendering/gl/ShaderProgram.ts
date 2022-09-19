@@ -1,13 +1,159 @@
-import {vec2, vec3, vec4, mat4} from 'gl-matrix';
+import {vec3, mat4} from 'gl-matrix';
 import Drawable from './Drawable';
 import {gl} from '../../globals';
 
 var activeProgram: WebGLProgram = null;
 
+const noiseShaderCode = `
+float random1(float p) {
+  return fract(sin(p * 592.4) * 102934.239);
+}
+
+vec3 random3(vec3 p) {
+  return fract(sin(vec3(dot(p, vec3(185.3, 563.9, 887.2)),
+                        dot(p, vec3(593.1, 591.2, 402.1)),
+                        dot(p, vec3(938.2, 723.4, 768.9))
+                  )) * 58293.492);
+}
+
+vec4 random4(vec4 p) {
+  return fract(sin(vec4(dot(p, vec4(127.1, 311.7, 921.5, 465.8)),
+                        dot(p, vec4(269.5, 183.3, 752.4, 429.1)),
+                        dot(p, vec4(420.6, 631.2, 294.3, 910.8)),
+                        dot(p, vec4(213.7, 808.1, 126.8, 572.0))
+                  )) * 43758.5453);
+}
+
+float surflet(float p, float gridPoint) {
+  float t2 = abs(p - gridPoint);
+  float t = 1.f - 6.f * pow(t2, 5.f) + 15.f * pow(t2, 4.f) - 10.f * pow(t2, 3.f);
+  float gradient = random1(gridPoint) * 2. - 1.;
+  float diff = p - gridPoint;
+  float height = diff * gradient;
+  return height * t;
+}
+
+float surflet(vec4 p, vec4 gridPoint) {
+  vec4 t2 = abs(p - gridPoint);
+  vec4 t = vec4(1.f) - 6.f * pow(t2, vec4(5.f)) + 15.f * pow(t2, vec4(4.f)) - 10.f * pow(t2, vec4(3.f));
+  vec4 gradient = random4(gridPoint) * 2. - vec4(1.);
+  vec4 diff = p - gridPoint;
+  float height = dot(diff, gradient);
+  return height * t.x * t.y * t.z * t.w;
+}
+
+float perlin(float p) {
+	float surfletSum = 0.f;
+
+	for (int dx = 0; dx <= 1; ++dx) {
+    surfletSum += surflet(p, floor(p) + float(dx));
+	}
+
+	return surfletSum;
+}
+
+float perlin(vec4 p) {
+	float surfletSum = 0.f;
+
+	for (int dx = 0; dx <= 1; ++dx) {
+		for (int dy = 0; dy <= 1; ++dy) {
+			for (int dz = 0; dz <= 1; ++dz) {
+        for (int dw = 0; dw <= 1; ++dw) {
+          surfletSum += surflet(p, floor(p) + vec4(dx, dy, dz, dw));
+        }
+			}
+		}
+	}
+
+	return surfletSum;
+}
+
+float perlin(vec3 p, float t) {
+  return perlin(vec4(p, t));
+}
+
+float perlin(vec3 p) {
+  return perlin(p, 0.0);
+}
+
+#define OCTAVES 4
+float fbm(vec4 p) {
+  float value = 0.0;
+  float amplitude = 0.5;
+  for (int i = 0; i < OCTAVES; ++i) {
+    value += amplitude * ((perlin(p) + 1.0) / 2.0);
+    p *= 2.0;
+    amplitude *= 0.5;
+  }
+  return value;
+}
+
+float fbm(vec3 p, float t) {
+  return fbm(vec4(p, t));
+}
+
+float fbm(vec3 p) {
+  return fbm(p, 0.0);
+}
+
+struct WorleyInfo {
+  float dist;
+  vec3 color;
+};
+
+WorleyInfo worley(vec4 uv) {
+  vec4 uvInt = floor(uv);
+  vec4 uvFract = uv - uvInt;
+  float minDist = 1.0f;
+
+  vec3 color;
+  for (int x = -1; x <= 1; ++x) {
+    for (int y = -1; y <= 1; ++y) {
+      for (int z = -1; z <= 1; ++z) {
+        for (int w = -1; w <= 1; ++w) {
+          vec4 neighbor = vec4(float(x), float(y), float(z), float(w));
+          vec4 point = random4(uvInt + neighbor);
+          vec4 diff = neighbor + point - uvFract;
+          float dist = length(diff);
+          if (dist < minDist) {
+            minDist = dist;
+            color = random4(point).rgb;
+          }
+        }
+      }
+    }
+  }
+
+  WorleyInfo worleyInfo;
+  worleyInfo.dist = minDist;
+  worleyInfo.color = color;
+  return worleyInfo;
+}
+
+WorleyInfo worley(vec3 p, float t) {
+  return worley(vec4(p, t));
+}
+`
+
+const lambertShaderCode = `
+#ifdef NO_LAMBERT
+  out_Col = diffuseColor;
+#else
+  float diffuseTerm = dot(normalize(fs_Nor), normalize(-fs_Pos)) + 0.2;
+  diffuseTerm = clamp(diffuseTerm, 0.0, 1.0) * 2.0;
+  float ambientTerm = 0.05;
+  float lightIntensity = diffuseTerm + ambientTerm;
+  out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+#endif
+`
+
 export class Shader {
   shader: WebGLShader;
 
   constructor(type: number, source: string) {
+    source = source.replace('NOISE GOES HERE', noiseShaderCode);
+    source = source.replace('LAMBERT GOES HERE', lambertShaderCode);
+
     this.shader = gl.createShader(type);
     gl.shaderSource(this.shader, source);
     gl.compileShader(this.shader);
@@ -23,12 +169,19 @@ class ShaderProgram {
 
   attrPos: number;
   attrNor: number;
+  attrUvs: number;
 
-  unifRef: WebGLUniformLocation;
-  unifEye: WebGLUniformLocation;
-  unifUp: WebGLUniformLocation;
-  unifDimensions: WebGLUniformLocation;
+  unifModel: WebGLUniformLocation;
+  unifModelInvTr: WebGLUniformLocation;
+  unifViewMat: WebGLUniformLocation;
+  unifProjMat: WebGLUniformLocation;
+  unifViewProj: WebGLUniformLocation;
+  unifCameraPos: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
+
+  unifDisplacementHeight: WebGLUniformLocation;
+  unifTimeScale: WebGLUniformLocation;
+  unifTemperature: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -42,11 +195,20 @@ class ShaderProgram {
     }
 
     this.attrPos = gl.getAttribLocation(this.prog, "vs_Pos");
-    this.unifEye   = gl.getUniformLocation(this.prog, "u_Eye");
-    this.unifRef   = gl.getUniformLocation(this.prog, "u_Ref");
-    this.unifUp   = gl.getUniformLocation(this.prog, "u_Up");
-    this.unifDimensions   = gl.getUniformLocation(this.prog, "u_Dimensions");
-    this.unifTime   = gl.getUniformLocation(this.prog, "u_Time");
+    this.attrNor = gl.getAttribLocation(this.prog, "vs_Nor");
+    this.attrUvs = gl.getAttribLocation(this.prog, "vs_UV");
+
+    this.unifModel      = gl.getUniformLocation(this.prog, "u_Model");
+    this.unifModelInvTr = gl.getUniformLocation(this.prog, "u_ModelInvTr");
+    this.unifViewMat    = gl.getUniformLocation(this.prog, "u_ViewMat");
+    this.unifProjMat    = gl.getUniformLocation(this.prog, "u_ProjMat");
+    this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
+    this.unifCameraPos  = gl.getUniformLocation(this.prog, "u_CameraPos");
+    this.unifTime       = gl.getUniformLocation(this.prog, "u_Time");
+
+    this.unifDisplacementHeight = gl.getUniformLocation(this.prog, "u_DisplacementHeight");
+    this.unifTimeScale = gl.getUniformLocation(this.prog, "u_TimeScale");
+    this.unifTemperature = gl.getUniformLocation(this.prog, "u_Temperature");
   }
 
   use() {
@@ -56,30 +218,73 @@ class ShaderProgram {
     }
   }
 
-  setEyeRefUp(eye: vec3, ref: vec3, up: vec3) {
+  setModelMatrix(model: mat4) {
     this.use();
-    if(this.unifEye !== -1) {
-      gl.uniform3f(this.unifEye, eye[0], eye[1], eye[2]);
+    if (this.unifModel !== -1) {
+      gl.uniformMatrix4fv(this.unifModel, false, model);
     }
-    if(this.unifRef !== -1) {
-      gl.uniform3f(this.unifRef, ref[0], ref[1], ref[2]);
-    }
-    if(this.unifUp !== -1) {
-      gl.uniform3f(this.unifUp, up[0], up[1], up[2]);
+
+    if (this.unifModelInvTr !== -1) {
+      let modelinvtr: mat4 = mat4.create();
+      mat4.transpose(modelinvtr, model);
+      mat4.invert(modelinvtr, modelinvtr);
+      gl.uniformMatrix4fv(this.unifModelInvTr, false, modelinvtr);
     }
   }
 
-  setDimensions(width: number, height: number) {
+  setViewMatrix(viewMat: mat4) {
     this.use();
-    if(this.unifDimensions !== -1) {
-      gl.uniform2f(this.unifDimensions, width, height);
+    if (this.unifViewMat !== -1) {
+      gl.uniformMatrix4fv(this.unifViewMat, false, viewMat);
     }
   }
 
-  setTime(t: number) {
+  setProjMatrix(projMat: mat4) {
     this.use();
-    if(this.unifTime !== -1) {
-      gl.uniform1f(this.unifTime, t);
+    if (this.unifProjMat !== -1) {
+      gl.uniformMatrix4fv(this.unifProjMat, false, projMat);
+    }
+  }
+
+  setViewProjMatrix(vp: mat4) {
+    this.use();
+    if (this.unifViewProj !== -1) {
+      gl.uniformMatrix4fv(this.unifViewProj, false, vp);
+    }
+  }
+
+  setCameraPos(cameraPos: vec3) {
+    this.use();
+    if (this.unifCameraPos !== -1) {
+      gl.uniform3fv(this.unifCameraPos, cameraPos);
+    }
+  }
+
+  setTime(time: number) {
+    this.use();
+    if (this.unifTime !== -1) {
+      gl.uniform1f(this.unifTime, time);
+    }
+  }
+
+  setDisplacementHeight(displacementHeight: number) {
+    this.use();
+    if (this.unifDisplacementHeight !== -1) {
+      gl.uniform1f(this.unifDisplacementHeight, displacementHeight);
+    }
+  }
+
+  setTimeScale(timeScale: number) {
+    this.use();
+    if (this.unifTimeScale !== -1) {
+      gl.uniform1f(this.unifTimeScale, timeScale);
+    }
+  }
+
+  setTemperature(temperature: number) {
+    this.use();
+    if (this.unifTemperature !== -1) {
+      gl.uniform1f(this.unifTemperature, temperature);
     }
   }
 
@@ -91,10 +296,22 @@ class ShaderProgram {
       gl.vertexAttribPointer(this.attrPos, 4, gl.FLOAT, false, 0, 0);
     }
 
+    if (this.attrNor != -1 && d.bindNor()) {
+      gl.enableVertexAttribArray(this.attrNor);
+      gl.vertexAttribPointer(this.attrNor, 4, gl.FLOAT, false, 0, 0);
+    }
+
+    if (this.attrUvs != -1 && d.bindUvs()) {
+      gl.enableVertexAttribArray(this.attrUvs);
+      gl.vertexAttribPointer(this.attrUvs, 2, gl.FLOAT, false, 0, 0);
+    }
+
     d.bindIdx();
     gl.drawElements(d.drawMode(), d.elemCount(), gl.UNSIGNED_INT, 0);
 
     if (this.attrPos != -1) gl.disableVertexAttribArray(this.attrPos);
+    if (this.attrNor != -1) gl.disableVertexAttribArray(this.attrNor);
+    if (this.attrUvs != -1) gl.disableVertexAttribArray(this.attrUvs);
   }
 };
 

@@ -73,9 +73,6 @@ function loadScene(gl: WebGL2RenderingContext) {
 
   planets = [sun, earth, moon, jupiter, saturn];
 
-  saturn = new Planet([0, 0, 0], 1.15, 2.2, null, 0.9).setShaderProgram(saturnShader);
-  planets = [saturn];
-
   earth.addAccessory().setDrawable(new Icosphere([0, 0, 0], 0.45, 4))
     .setShaderProgram(earthCloudsShader);
   saturn.addAccessory().setDrawable(new Ring(1.5, 3.0, 96))
@@ -160,7 +157,7 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI({ width: 400 });
 
-  let gController = gui.add(controls, 'G', 0, 20).onChange((newG: number) => {
+  let gController = gui.add(controls, 'G', 0, 100).onChange((newG: number) => {
     Planet.G = newG;
   });
 

@@ -9,6 +9,7 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Planet from './geometry/Planet';
 import * as rng from './random'
 import Icosphere from './geometry/Icosphere';
+import Ring from './geometry/Ring';
 
 const controls = {
   G: 1.0,
@@ -39,6 +40,7 @@ let jupiterShader: ShaderProgram;
 let saturnShader: ShaderProgram;
 
 let earthCloudsShader: ShaderProgram;
+let saturnRingsShader: ShaderProgram;
 
 let planets: Array<Planet> = [];
 
@@ -76,6 +78,8 @@ function loadScene(gl: WebGL2RenderingContext) {
 
   earth.addAccessory().setDrawable(new Icosphere([0, 0, 0], 0.45, 4))
     .setShaderProgram(earthCloudsShader);
+  saturn.addAccessory().setDrawable(new Ring(1.5, 3.0, 96))
+    .setShaderProgram(saturnRingsShader);
 
   asteroids = [];
   for (let i = 0; i < numAsteroids; ++i) {
@@ -149,6 +153,7 @@ function main() {
   saturnShader = createNoDisplacementShader(gl, 'saturn');
 
   earthCloudsShader = createNoDisplacementShader(gl, 'earth-clouds');
+  saturnRingsShader = createNoDisplacementShader(gl, 'saturn-rings');
 
   asteroidShader = createPlanetShader(gl, 'asteroid');
 

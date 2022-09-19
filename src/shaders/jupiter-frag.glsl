@@ -17,14 +17,14 @@ out vec4 out_Col;
 
 NOISE GOES HERE
 
-vec3 jupiterBaseColor1 = vec3(193.0, 181.0, 163.0) / 255.0;
-vec3 jupiterBaseColor2 = vec3(172.0, 149.0, 110.0) / 255.0;
-vec3 jupiterHighlightColor1 = vec3(205.0, 134.0, 54.0) / 255.0;
-vec3 jupiterHighlightColor2 = vec3(255.0, 136.0, 3.0) / 255.0;
-vec3 jupiterStormsBlueColor1 = vec3(48.0, 173.0, 240.0) / 255.0;
-vec3 jupiterStormsBlueColor2 = vec3(30.0, 118.0, 212.0) / 255.0 * 0.5;
-vec3 jupiterStormsRedColor1 = vec3(252.0, 73.0, 3.0) / 255.0;
-vec3 jupiterStormsRedColor2 = vec3(201.0, 45.0, 14.0) / 255.0 * 0.5;
+const vec3 jupiterBaseColor1 = vec3(193.0, 181.0, 163.0) / 255.0;
+const vec3 jupiterBaseColor2 = vec3(172.0, 149.0, 110.0) / 255.0;
+const vec3 jupiterHighlightColor1 = vec3(205.0, 134.0, 54.0) / 255.0;
+const vec3 jupiterHighlightColor2 = vec3(255.0, 136.0, 3.0) / 255.0;
+const vec3 jupiterStormsBlueColor1 = vec3(48.0, 173.0, 240.0) / 255.0;
+const vec3 jupiterStormsBlueColor2 = vec3(30.0, 118.0, 212.0) / 255.0 * 0.5;
+const vec3 jupiterStormsRedColor1 = vec3(252.0, 73.0, 3.0) / 255.0;
+const vec3 jupiterStormsRedColor2 = vec3(201.0, 45.0, 14.0) / 255.0 * 0.5;
 
 void main() {
   float verticalNoiseLarge = perlin(fs_OriginalPos.y * 3.0 + 10.0 + perlin(fs_OriginalPos.xyz * 3.0, u_Time / 2000.0) * 0.15);

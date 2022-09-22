@@ -1,5 +1,27 @@
 # [Project 1: Noise](https://github.com/CIS-566-Fall-2022/hw01-fireball-base)
 
+* Link to my repository: https://github.com/mikolaslorant/Project1-Noise
+* This project was forked from a different repository following a wrong link in the instructions. So professor Mally authorized me to submit a video demo instead of a live demo: https://drive.google.com/file/d/1sbS7iK1Q7LtWoegiMSXMbPe_mFLP1iBg/view?usp=sharing
+
+* Screenshots
+
+
+![](screenshot1.png)
+
+
+![](screenshot2.png)
+
+
+![](screenshot3.png)
+
+
+* So first the multi octave noise function was applied to outer atmosphere both as a cloudy fragment shader and a displacement vertex shader that pulses with time.
+* A inner sphere with noise combined with a gradient shader was made to give the outer look of the red planet that changes with the camera movement.
+* A core was create with a black flat shader in the center.
+* A texture was applied to an outer sphere to give the galaxy with stars background.
+* A control value was added to the GUI to modify the amount of atmosphere or protection present for the planet.
+
+
 ## Objective
 
 Get comfortable with using WebGL and its shaders to generate an interesting 3D, continuous surface using a multi-octave noise algorithm.

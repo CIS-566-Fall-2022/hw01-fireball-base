@@ -2,7 +2,7 @@
 
 Yilin Liu
 
-[Live Demo]()
+[Live Demo](https://bigfranklin1.github.io/CIS566-hw01-fireball-base/)
 
 ![Fireball](images/fireball2.gif)
 

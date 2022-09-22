@@ -1,5 +1,25 @@
 # [Project 1: Noise](https://github.com/CIS-566-Fall-2022/hw01-fireball-base)
 
+## Fireball
+### Live Demo
+Link: https://fridawang.github.io/hw01-fireball-base/
+
+### Interactive parameters:
+* Background gradient base color
+* Noise intensity
+* Rotation speed
+
+### Main features:
+* Use a combination of `perlinNoise3D()` and `cnosie()` to calculate the vectex offset on the sphere.
+* Uses `vs_Pos` plus `u_Time` as parameters for noise generation.
+* The radius of the circle in the background is determined by the distance between the pixel and centroid, which varies over time. `bias()` and `gain()` are used so that the radius does not change at a uniform rate.
+
+### Results preview:
+![fireball](https://user-images.githubusercontent.com/33616958/191404734-28cf103c-81a8-4421-af37-b4ebcbc5f6af.gif)
+
+![fireball-2](https://user-images.githubusercontent.com/33616958/191409128-8a8e9d32-e97c-42f8-877c-736c914b1b42.gif)
+
+
 ## Objective
 
 Get comfortable with using WebGL and its shaders to generate an interesting 3D, continuous surface using a multi-octave noise algorithm.

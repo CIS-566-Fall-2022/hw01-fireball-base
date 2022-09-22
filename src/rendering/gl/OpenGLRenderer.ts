@@ -6,6 +6,8 @@ import ShaderProgram from './ShaderProgram';
 
 // In this file, `gl` is accessible because it is imported above
 class OpenGLRenderer {
+  geoCol: vec4;
+
   constructor(public canvas: HTMLCanvasElement) {
   }
 
@@ -18,13 +20,24 @@ class OpenGLRenderer {
     this.canvas.height = height;
   }
 
+  setGeoColor(r: number, g: number, b: number, a: number) {
+    this.geoCol = vec4.fromValues(r/255, g/255, b/255, a/255);
+  }
+
   clear() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
 
-  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, time: number) {
-    prog.setEyeRefUp(camera.controls.eye, camera.controls.center, camera.controls.up);
-    prog.setTime(time);
+  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>) {
+    let model = mat4.create();
+    let viewProj = mat4.create();
+    let color = vec4.fromValues(1, 0, 0, 1);
+
+    mat4.identity(model);
+    mat4.multiply(viewProj, camera.projectionMatrix, camera.viewMatrix);
+    prog.setModelMatrix(model);
+    prog.setViewProjMatrix(viewProj);
+    prog.setGeometryColor(this.geoCol);
 
     for (let drawable of drawables) {
       prog.draw(drawable);

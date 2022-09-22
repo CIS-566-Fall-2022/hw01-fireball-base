@@ -2,19 +2,6 @@
 
 * Link to my repository: https://github.com/mikolaslorant/Project1-Noise
 * This project was forked from a different repository following a wrong link in the instructions. So professor Mally authorized me to submit a video demo instead of a live demo: https://drive.google.com/file/d/1sbS7iK1Q7LtWoegiMSXMbPe_mFLP1iBg/view?usp=sharing
-
-* Screenshots
-
-
-![](screenshot1.png)
-
-
-![](screenshot2.png)
-
-
-![](screenshot3.png)
-
-
 * So first the multi octave noise function was applied to outer atmosphere both as a cloudy fragment shader and a displacement vertex shader that pulses with time.
 * A inner sphere with noise combined with a gradient shader was made to give the outer look of the red planet that changes with the camera movement.
 * A core was create with a black flat shader in the center.

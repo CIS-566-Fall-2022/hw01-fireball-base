@@ -139,9 +139,9 @@ void main()
                                                             // perpendicular to the surface after the surface is transformed by
                                                             // the model matrix.
     
-    vec4 deform = vs_Nor * (sin10x(fbm(vs_Pos.xyz) * float(u_Time)) + 1.0 / 2.f) * 0.02f;  // Range(0, 0.03)    higher-frequency, lower-amplitude layer of fractal Brownian motion
+    vec4 deform = vs_Nor * (sin10x(fbm(vs_Pos.xyz) * float(sin(u_Time))) + 1.0 / 2.f) * 0.03f;  // Range(0, 0.03)    higher-frequency, lower-amplitude layer of fractal Brownian motion
 
-    vec4 deformLF = vs_Nor * (sin(fbm(vs_Pos.xyz) * float(u_Time)) + 1.0 / 2.f) * 0.1f;   // Range(0, 0.09)    low-frequency, high-amplitude displacement, combination of sine
+    vec4 deformLF = vs_Nor * (sin(0.5f * fbm(vs_Pos.xyz) * float(sin(u_Time))) + 1.0 / 2.f) * 0.2f;   // Range(0, 0.09)    low-frequency, high-amplitude displacement, combination of sine
 
     fs_Displacement = deform + deformLF;    // Range (0, 0.09)
 

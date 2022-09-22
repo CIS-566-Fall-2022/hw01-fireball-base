@@ -24,6 +24,11 @@ const controls = {
 };
 
 let icosphere: Icosphere;
+let icosphereLine: Icosphere;
+let icosphereLine2: Icosphere;
+let icosphereLine3: Icosphere;
+let icosphereLine4: Icosphere;
+
 let square: Square;
 let cube: Cube;
 let time: vec4 = vec4.fromValues(0, 0, 0, 0);
@@ -36,8 +41,8 @@ function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(3, 0, 0), 1, controls.tesselations);
   icosphere.create();
   
-  square = new Square(vec3.fromValues(-2, 0, 0));
-  square.create();
+  // square = new Square(vec3.fromValues(-2, 0, 0), vec3.fromValues(1, 1, 1));
+  // square.create();
 
   cube = new Cube(vec3.fromValues(0, 0, 0));
   cube.create();
@@ -59,7 +64,7 @@ function main() {
   gui.addColor(controls, 'Color');
   gui.addColor(controls, 'Noise Color');
   // gui.add(controls, 'Shader', 0, 1).step(1);
-  gui.add(controls, 'Shaders', [ 'Lambert', 'Perlin Noise', 'Transform', 'Fireball' ] );
+  // gui.add(controls, 'Shaders', [ 'Lambert', 'Perlin Noise', 'Transform', 'Fireball' ] );
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -115,32 +120,56 @@ function main() {
     }
     var shader;
     if(controls.Shaders == 'Lambert'){
-      shader = lambert;
-      renderer.render(camera, time, color, noiseColor, shader, [
+      renderer.render(camera, time, color, noiseColor, lambert, [
         cube,  icosphere,
-      ]);
+      ], false);
     }
     if(controls.Shaders == 'Perlin Noise'){
       shader = perlin;
-      renderer.render(camera, time, color, noiseColor, shader, [
+      renderer.render(camera, time, color, noiseColor, perlin, [
         cube,  icosphere,
-      ]);
+      ], false);
     }
     if(controls.Shaders == 'Transform'){
       shader = transform;
-      renderer.render(camera, time, color, noiseColor, shader, [
+      renderer.render(camera, time, color, noiseColor, transform, [
         cube,  
-      ]);
+      ],false);
     }
 
     if(controls.Shaders == 'Fireball'){
+      square = new Square(vec3.fromValues(-2, -2, -2), vec3.fromValues(10, 10, 1));
+      square.create();
+
       icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, prevTesselations);
       icosphere.create();
 
-      shader = fireball;
-      renderer.render(camera, time, color, noiseColor, shader, [
-        icosphere,  
-      ]);
+      icosphereLine = new Icosphere(vec3.fromValues(0, 0, 0), 1.5, 2);
+      icosphereLine.create();
+      
+      icosphereLine2 = new Icosphere(vec3.fromValues(0, 0, 0), 2.0, 1);
+      icosphereLine2.create();
+
+      icosphereLine3 = new Icosphere(vec3.fromValues(0, 0, 0), 4.0, 1);
+      icosphereLine3.create();
+
+      // icosphereLine4 = new Icosphere(vec3.fromValues(0, 0, 0), 6.0, 1);
+      // icosphereLine4.create();
+      renderer.render(camera, time, color, noiseColor, fireball, [
+        icosphere
+      ], false);
+      renderer.render(camera, time, color, noiseColor, fireball, [
+        icosphereLine
+      ], true);
+      renderer.render(camera, time, color, noiseColor, fireball, [
+        icosphereLine2
+      ], true);
+      renderer.render(camera, time, color, noiseColor, fireball, [
+        icosphereLine3
+      ], true);
+      // renderer.render(camera, time, color, noiseColor, fireball, [
+      //   icosphereLine4
+      // ], true);
     }
 
 

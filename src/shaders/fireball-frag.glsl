@@ -160,12 +160,12 @@ void main()
         vec3 noiseDrive = (fs_Pos.xyz + u_Time.xyz) * scale;
         
         color = mix(color, u_Color.rgb, fbm(noiseDrive));
-        float heightStrength = map(length(fs_Displacement), 0.0, 0.12, 0.9, 1.8);
-        float heightStrength2 = map(length(fs_Displacement), 0.0, 0.12, 0.3, 0.5);
+        float heightStrength = map(length(fs_Displacement), 0.0, 0.23, 0.9, 1.8);
+        float heightStrength2 = map(length(fs_Displacement), 0.0, 0.23, 0.3, 0.5);
 
-            color = vec3(color.x * bias(0.7f, heightStrength), 
-                        color.y * bias(0.6f, heightStrength), 
-                        color.z * bias(0.6f, heightStrength)) ; 
+        color = vec3(color.x * bias(0.7f, heightStrength), 
+                    color.y * bias(0.6f, heightStrength), 
+                    color.z * bias(0.6f, heightStrength)) ; 
         // if(length(fs_Displacement) < 0.10f){
 
         //     // color = vec3(color.x * 1.5f, color.y * 1.5f, color.g) * bias(0.3f, heightStrength) ; 

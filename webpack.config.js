@@ -6,7 +6,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
-    publicPath: '/',
+    publicPath: '/hw01-fireball-base/',
   },
   module: {
     rules: [
@@ -19,6 +19,10 @@ module.exports = {
         test: /\.glsl$/,
         loader: 'webpack-glsl-loader'
       },
+      {
+        test: /\.mp3$/,
+        loader: 'file-loader',
+      },
     ]
   },
   resolve: {
@@ -26,7 +30,7 @@ module.exports = {
   },
   devtool: 'source-map',
   devServer: {
-    port: 5660,
+    port: 7000,
     static: {
       directory: path.join(__dirname, 'dist'),
     },

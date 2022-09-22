@@ -1,5 +1,8 @@
 # [Project 1: Noise](https://github.com/CIS-566-Fall-2022/hw01-fireball-base)
 
+## Description
+I used 3Dfbm in lower and higher frequencies to create two overlapping layers of noise on my sphere. I then used the depth of the noise to determine the color so closer to the sphere is blue and farthest away is yellow like the way fire works. I included multiple ways to play around with my noise functions by changing the octaves, the frequency, and the amplitude of the waves. I also used fbm to create starts in the background of the scene. 
+
 ## Objective
 
 Get comfortable with using WebGL and its shaders to generate an interesting 3D, continuous surface using a multi-octave noise algorithm.

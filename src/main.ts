@@ -106,7 +106,7 @@ function main() {
     stats.end();
 
     renderer.render(camera, back, [
-      // background
+      background
     ], uniftime,
     controls.Blob,
     controls.Warmth,

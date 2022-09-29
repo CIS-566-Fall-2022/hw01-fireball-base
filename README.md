@@ -1,5 +1,39 @@
 # [Project 1: Noise](https://github.com/CIS-566-Fall-2022/hw01-fireball-base)
 
+## Explosion Fireball
+
+![](./images/Untitled.jpg)
+
+View it on your [browser](https://ess-aar.github.io/CIS5660-hw01-fireball-base/)
+
+I started with the intention of creating a classic exposion-like look to my fireball. To achieve this I used 3D Perlin noise (with lower freg, higher amplitude) to distort the base sphere shape & 3D FBM noise (with higher freq, lower amplitude) to add flame like displacement on top of the base. The coloring was key to achieve the explosion-like visual. The value of displacement from the vertex shader is used as the threshold for the color change in the fragment shader. I decided to add bloom effect to the very yellow parts of the fireball to give it an emmisive look.
+
+For the background I decided to try out domain warping to add more interest to the scene. This invloved 3 layers of FMB noise applied to the UVs and mix of 4 colors. The color selection here gives the background a more cloudy look (as opposed to a marbled effect). There is also a glow in the background behind the fireball to fake light from it.
+
+Noise used: 3D Perlin, 3D FBM
+
+Toolbox functions used: Linear Interpolation, Cosine Interpolation, Sin waves
+
+### Parameters
+
+Following parameters are exposed:
+
+- Tesselations: to control the number of subdivisions of the icoshpere
+- Time Scale: to speed up or slow down the passing of time
+- Rotation Rate: controls the speed of icosphere's rotation
+- Frequency: controls the frequency of the perlin noise applied to the base geomtry
+- Persistence: controls the contribution of layers of FBM noise applied ()
+- Octaves: controls the number of layers of FBM noise applied
+- Bloom: toggle for the bloom effect on the fireball
+- Color: influences the background color;
+
+### References
+- CIS 5660 Noise, Toolbox Function material
+- CIS 5600 Noise material
+- [Domain Warping](https://iquilezles.org/articles/warp/)
+- [The Book of Shaders](https://thebookofshaders.com/13/)
+- [Art of Code](https://www.youtube.com/c/TheArtofCodeIsCool/videos)
+
 ## Objective
 
 Get comfortable with using WebGL and its shaders to generate an interesting 3D, continuous surface using a multi-octave noise algorithm.

@@ -4,13 +4,16 @@ import Camera from '../../Camera';
 import {gl} from '../../globals';
 import ShaderProgram from './ShaderProgram';
 
+
 // In this file, `gl` is accessible because it is imported above
 class OpenGLRenderer {
+  flip = 0;
   constructor(public canvas: HTMLCanvasElement) {
   }
 
   setClearColor(r: number, g: number, b: number, a: number) {
     gl.clearColor(r, g, b, a);
+
   }
 
   setSize(width: number, height: number) {
@@ -23,13 +26,32 @@ class OpenGLRenderer {
   }
 
   render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, time: number) {
-    prog.setEyeRefUp(camera.controls.eye, camera.controls.center, camera.controls.up);
+    let model = mat4.create();
+    let viewProj = mat4.create();
+    if(!this.flip){
+      let color = vec4.fromValues(1, 0, 0, 1);
+      prog.setGeometryColor(color);
+      this.flip = 1;
+    }
+    
+    mat4.identity(model);
+    mat4.multiply(viewProj, camera.projectionMatrix, camera.viewMatrix);
+    prog.setModelMatrix(model);
+    prog.setViewProjMatrix(viewProj);
+    
     prog.setTime(time);
-
     for (let drawable of drawables) {
       prog.draw(drawable);
     }
   }
+  // render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, time: number) {
+  //   prog.setEyeRefUp(camera.controls.eye, camera.controls.center, camera.controls.up);
+  //   prog.setTime(time);
+
+  //   for (let drawable of drawables) {
+  //     prog.draw(drawable);
+  //   }
+  // }
 };
 
 export default OpenGLRenderer;

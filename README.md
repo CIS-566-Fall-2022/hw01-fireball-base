@@ -1,73 +1,57 @@
-# [Project 1: Noise](https://github.com/CIS-566-Fall-2022/hw01-fireball-base)
+# Project 1: Noise Functions
+Making an eyeball using noise functions - [Click here for live demo]()
+---
+*Note: some artifacts such as bands/rings which don't appear to be interpolating smoothly in the gifs on README.md are not visible in the live demo.*
 
-## Objective
+![](images/Eyeball_final.gif)
 
-Get comfortable with using WebGL and its shaders to generate an interesting 3D, continuous surface using a multi-octave noise algorithm.
+## Introduction
 
-## Getting Started
+Noise functions form the basis of many aesthetically-pleasing graphics creations. A noise function is a seeded random number generator.
+- Given some input parameters, returns a random-looking number: y = noise(x)
+- Same input parameters will always produce the same output.
 
-1. Fork and clone [this repository](https://github.com/CIS700-Procedural-Graphics/Project1-Noise).
+In this project, I have used a noise functions like FBM and Worley noise combined with some basic math functionsto generate an eerie looking eyeball. I will describe each of these functions below:
 
-2. Copy your hw0 code into your local hw1 repository.
+**1. FBM (Multi-Octave Fractal Brownian Motion)** : An FBM noise can be generated using a combination of multiple component frequencies. Each octave contribution can be modulated using frequency(rate of sampling) and persistence(decay of amplitude as frequency increases). I have used FBM noise to distort the blue color of iris and red color of the eyeball. Both these persistence values are parametrized and can be controlled by the user.
 
-3. In the root directory of your project, run `npm install`. This will download all of those dependencies.
+![](images/parameters.gif)
 
-4. Do either of the following (but I highly recommend the first one for reasons I will explain later).
+**2. Worley Noise** : In this project, I have used Worley noise as an interesting background with time affecting its input parameter
 
-    a. Run `npm start` and then go to `localhost:7000` in your web browser
-
-    b. Run `npm run build` and then go open `index.html` in your web browser
-
-    You should hopefully see the framework code with a 3D cube at the center of the screen!
-
-
-## Developing Your Code
-All of the JavaScript code is living inside the `src` directory. The main file that gets executed when you load the page as you may have guessed is `main.js`. Here, you can make any changes you want, import functions from other files, etc. The reason that I highly suggest you build your project with `npm start` is that doing so will start a process that watches for any changes you make to your code. If it detects anything, it'll automagically rebuild your project and then refresh your browser window for you. Wow. That's cool. If you do it the other way, you'll need to run `npm build` and then refresh your page every time you want to test something.
-
-## Publishing Your Code
-We highly suggest that you put your code on GitHub. One of the reasons we chose to make this course using JavaScript is that the Web is highly accessible and making your awesome work public and visible can be a huge benefit when you're looking to score a job or internship. To aid you in this process, running `npm run deploy` will automatically build your project and push it to `gh-pages` where it will be visible at `username.github.io/repo-name`.
-
-## Setting up `main.ts`
-
-Alter `main.ts` so that it renders the icosphere provided, rather than the cube you built in hw0. You will be writing a WebGL shader to displace its surface to look like a fireball. You may either rewrite the shader you wrote in hw0, or make a new `ShaderProgram` instance that uses new GLSL files.
-
-## Noise Generation
-
-Across your vertex and fragment shaders, you must implement a variety of functions of the form `h = f(x,y,z)` to displace and color your fireball's surface, where `h` is some floating-point displacement amount.
-
-- Your vertex shader should apply a low-frequency, high-amplitude displacement of your sphere so as to make it less uniformly sphere-like. You might consider using a combination of sinusoidal functions for this purpose.
-- Your vertex shader should also apply a higher-frequency, lower-amplitude layer of fractal Brownian motion to apply a finer level of distortion on top of the high-amplitude displacement.
-- Your fragment shader should apply a gradient of colors to your fireball's surface, where the fragment color is correlated in some way to the vertex shader's displacement.
-- Both the vertex and fragment shaders should alter their output based on a uniform time variable (i.e. they should be animated). You might consider making a constant animation that causes the fireball's surface to roil, or you could make an animation loop in which the fireball repeatedly explodes.
-- Across both shaders, you should make use of at least four of the functions discussed in the Toolbox Functions slides.
+To generate Worley noise,
+- Scatter N points randomly in a 2D image
+- For every pixel in the image, find the point to which it is closest
+- Calculate the distance between the pixel and point, and set the pixel’s brightness to that distance value
+- If distance > 1, clamp to 1
 
 
-## Noise Application
+![](images/worley.gif)
 
-View your noise in action by applying it as a displacement on the surface of your icosahedron, giving your icosahedron a bumpy, cloud-like appearance. Simply take the noise value as a height, and offset the vertices along the icosahedron's surface normals. You are, of course, free to alter the way your noise perturbs your icosahedron's surface as you see fit; we are simply recommending an easy way to visualize your noise. You could even apply a couple of different noise functions to perturb your surface to make it even less spherical.
+## Eyeball in making
 
-In order to animate the vertex displacement, use time as the third dimension or as some offset to the (x, y, z) input to the noise function. Pass the current time since start of program as a uniform to the shaders.
+### The pupil
 
-For both visual impact and debugging help, also apply color to your geometry using the noise value at each point. There are several ways to do this. For example, you might use the noise value to create UV coordinates to read from a texture (say, a simple gradient image), or just compute the color by hand by lerping between values.
+![](images/pupil.gif)
 
-## Interactivity
+The pupil itself mixes black with r(which depends on x and y) and gives more weight to r where r = sqrt(x <sup>2</sup> + y <sup>2</sup> ); where x and y are fragment positions. So when both x and y tend to 0, mixed result shows black.
 
-Using dat.GUI, make at least THREE aspects of your demo interactive variables. For example, you could add a slider to adjust the strength or scale of the noise, change the number of noise octaves, etc. 
+### The iris
 
-Add a button that will restore your fireball to some nice-looking (courtesy of your art direction) defaults. :)
+![](images/iris.gif)
 
-## Extra Spice
+The iris is made up my mixing blue, green and brown FBM distributions using smoothstep. A combination of cos waves with small phase differences generates the lines on the iris. These waves depend on z coordinate of the fragment position, and theta calculated as atan(x,y).
 
-Choose one of the following options: 
+### The eyeball
 
-- Background (easy-hard depending on how fancy you get): Add an interesting background or a more complex scene to place your fireball in so it's not floating in a black void
-- Custom mesh (easy): Figure out how to import a custom mesh rather than using an icosahedron for a fancy-shaped cloud.
-- Mouse interactivity (medium): Find out how to get the current mouse position in your scene and use it to deform your cloud, such that users can deform the cloud with their cursor.
-- Music (hard): Figure out a way to use music to drive your noise animation in some way, such that your noise cloud appears to dance.
+![](images/eyeball.gif)
 
-## Submission
+The eyeball is an FBM noise with 8 octaves which distributes the red color. Combining this with the iris waves generates vein like structures behind the eyeball.
 
-- Update README.md to contain a solid description of your project
-- Publish your project to gh-pages. `npm run deploy`. It should now be visible at http://username.github.io/repo-name
-- Create a [pull request](https://help.github.com/articles/creating-a-pull-request/) to this repository, and in the comment, include a link to your published project.
-- Submit the link to your pull request on Canvas.
+
+## References
+
+1. UPenn CIS 566 Procedural Graphics course slides
+2. UPenn CIS 460 Interactive Computer Graphics course slides
+3. [Inigo Quilez website](https://iquilezles.org/)
+4. [Live demo backup link](https://rcj9719.github.io/ProceduralGraphics-NoiseFunctions/)

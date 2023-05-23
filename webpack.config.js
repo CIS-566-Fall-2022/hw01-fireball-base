@@ -6,7 +6,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
-    publicPath: '/',
+    publicPath: '/webgl-music-visualizer/',
   },
   module: {
     rules: [
@@ -18,6 +18,10 @@ module.exports = {
       {
         test: /\.glsl$/,
         loader: 'webpack-glsl-loader'
+      },
+      {
+        test: /\.mp3$/,
+        loader: 'file-loader',
       },
     ]
   },

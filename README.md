@@ -1,3 +1,27 @@
+# super cool update- 09/22 - Live Demo:
+
+Woooo!!! Live demo !!
+https://logancho.github.io/3D-Calcifer/
+
+# Submission:
+
+Hi!! it's me again. I somehow managed to get hw00 gh-pages working after a lot of time digging through stack overflow, but now it doesn't work again... so no github live demo... yet. I hate this ;-;
+
+That said, this project was sooo fun, and I'll probably be spending my weekend/who knows how long afterwards improving on it just because there's so many different things I want to do, but just didnt have enough time to implement. 
+
+Description: Calcifer!
+
+![](./screenshot.png)
+
+The moment I saw the title of this hw on canvas, I already knew I wanted to do some kind of blobby monster- calcifer from Howl's Moving Castle eventually came to mind and so I tried my best to preserve his essence! I used a 3D pseudo-random hash value noise function (Credit: https://www.shadertoy.com/view/4dS3Wd, "Morgan McGuire @morgan3d, http://graphicscodex.com, Reuse permitted under the BSD license") as the basis for my implementation of FBM. I used a single octave, high amplitude fbm for the large, smooth noise displacement of calcifer, and then a higher octave, lower amplitude FBM for more flame-like roughness. I also wanted the flames and noise and in general to be concentrated at the top of calcifer, and so I weighted all the noise values by the inverse of the angle between positions and the positive y axis! Doing this gave me a tear-drop shape to work with.
+
+I also didn't want his eyes to be bulging out in free space, and so I tried to flatten the front of his body in a similar way through using the angle between points and the negative z-axis. 
+
+The mouth went through a lot of trial and error, but eventually, I decided I would simply have the mouth drawn on in the fireball fragment shader (that is, the shader I use for Calcifer's red/yellow body colors.) In this shader, I interpolate between two colors, yellow and red, with an in-out easing function, and in order to give the illusion of Calcifer being a real glowing flame, I incorporate the camera's position such that the middle of Calcifer is always yellow, and his edges are red, no matter what direction you look at him in!
+
+This whole project brought my understanding of FBM, noise, seeing sinusoidal patterns in fire?? and etc. to a new level, and I'm sad I couldn't end up with more time to spend on improving him, but for tonight's deadline, I think he'll be alright : D.
+
+
 # [Project 1: Noise](https://github.com/CIS-566-Fall-2022/hw01-fireball-base)
 
 ## Objective

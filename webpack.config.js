@@ -22,7 +22,7 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.ts', '.js' ],
+    extensions: ['.ts', '.js' , '.png', '.jpg',],
   },
   devtool: 'source-map',
   devServer: {

@@ -19,6 +19,9 @@ class Camera {
       eye: position,
       center: target,
     });
+
+    //
+
     vec3.add(this.target, this.position, this.direction);
     mat4.lookAt(this.viewMatrix, this.controls.eye, this.controls.center, this.controls.up);
   }
@@ -35,6 +38,7 @@ class Camera {
     this.controls.tick();
     vec3.add(this.target, this.position, this.direction);
     mat4.lookAt(this.viewMatrix, this.controls.eye, this.controls.center, this.controls.up);
+    // console.log(this.target);
   }
 };
 
